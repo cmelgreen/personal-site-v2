@@ -1,11 +1,11 @@
 provider "aws" {
-    region = "us-west-2"
+    region = "us-east-2"
 }
 
 resource "aws_s3_bucket" "site_bucket" {
-  bucket = "cmelgreen-site-bucket"
+  bucket = "cmelgreen-test-site-bucket"
   acl    = "public-read"
-  policy = <<EOF
+  policy = <<POLICY
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -14,11 +14,11 @@ resource "aws_s3_bucket" "site_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::cmelgreen-site-bucket/*"
+            "Resource": "arn:aws:s3:::cmelgreen-test-site-bucket/*"
         }
     ]
 }
-EOF
+POLICY
 
   website {
     index_document = "index.html"
@@ -122,4 +122,92 @@ resource "aws_cloudfront_distribution" "site_distribution" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+}
+
+resource "aws_iam_role" "codebuild_iam_role" {
+  name = "example"
+
+  assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "codebuild.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy" "codebuild_role_policy" {
+  role = aws_iam_role.example.name
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ],
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "${aws_s3_bucket.site_bucket.arn}",
+        "${aws_s3_bucket.site_bucket.arn}/*"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_codebuild_project" "site_codebuild" {
+  name          = "site-codebuild"
+  description   = "test_site_codebuild_project"
+  build_timeout = "5"
+  service_role  = aws_iam_role.codebuild_role_policy.arn
+
+  artifacts {
+    type = "S3"
+    name = "."
+    location = aws_s3_bucket.site_bucket.bucket
+    namespace_type = "NONE"
+    packaging = "NONE"
+  }
+
+  environment {
+    compute_type                = "BUILD_GENERAL1_MEDIUM"
+    image                       = "aws/codebuild/standard:1.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+  }
+
+  logs_config {
+    cloudwatch_logs {
+      group_name  = "log-group"
+      stream_name = "log-stream"
+    }
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/cmelgreen/personal-site-v2"
+    git_clone_depth = 1
+  }
+
 }
