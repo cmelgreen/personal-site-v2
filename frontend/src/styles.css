@@ -1,0 +1,93 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Vollkorn&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Karla:wght@200&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.App {
+  /* display: flex;
+  flex-wrap: wrap; */
+  /* position: relative; */
+
+  height: 200vh;
+
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  top: 0;
+  left: 0;
+}
+
+.top-bar {
+  background-color: rgba(0, 0, 0, 0);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.main-menu {
+  justify-content: center;
+}
+
+.splash{
+  align-content: center;
+}
+
+.big-picture {
+  /* position: fixed; */
+  grid-column: 1;
+  grid-row: 1;
+
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: auto;
+  max-height: 100vh; 
+  object-fit: cover;
+  object-position: left top;
+  transition: clip-path 1000ms ease-in-out;
+  clip-path: inset(0% 20% 0% 20%);
+  z-index: -1;
+}
+
+.center-content {
+  padding-top: 18%;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.big-picture-text {
+  color: white;
+  padding: 10;
+}
+
+.animate-reveal {
+  clip-path: inset(0% 0% 0% 0%);
+}
+
+.lower-case {
+  text-transform: none;
+}
+
+.body::first-letter {
+  font-size: 56px;
+  line-height: 48px;
+  float: left;
+  padding-right: .05em;
+  padding-top: 0px;
+  margin-bottom: -10px;
+}
+
+html {
+  visibility: visible;
+  opacity: 1;
+}

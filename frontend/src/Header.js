@@ -1,0 +1,61 @@
+import React from 'react'
+
+import Box from '@material-ui/core/Box'
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import useScrollTrigger from "@material-ui/core/useScrollTrigger";
+import SvgIcon from '@material-ui/core/SvgIcon'
+
+//header
+import { AppBar, IconButton, Toolbar } from "@material-ui/core";
+
+
+import Slide from "@material-ui/core/Slide";
+import { makeStyles } from "@material-ui/core/styles";
+
+import MenuIcon from "@material-ui/icons/Menu";
+
+export function Header (props) {
+    const trigger = useScrollTrigger({ threshold: 20 });
+
+    const buttons = ["DevOps", "Backend", "Frontend"];
+  
+    const color = props.primary ? "primary" : "textPrimary";
+    const bgColor = props.primary ? "transparent" : "default";
+  
+    const classes = makeStyles((theme) => ({
+      name: {
+        [theme.breakpoints.up("sm")]: { display: 'none'},
+      }
+    }));
+  
+    return (
+        <Slide appear={false} in={!trigger} timeout={400}>
+          <AppBar color={bgColor} elevation={0}>
+            <Toolbar className="main-menu">
+              <IconButton edge="start" aria-label="menu">
+              </IconButton>
+              <Box display={{'xs': 'none', 'sm': 'block'}}>
+                <Button onClick={props.onClick("About Me")}>
+                  <Typography style={{ textTransform: "none" }} color={color} variant="h5">
+                    Cooper Melgreen
+                  </Typography>
+                </Button>
+              </Box>
+              <Box display={{'xs': 'none', 'sm': 'block'}}>
+                <Typography style={{ marginLeft: 20, marginRight: 20 }} color={color} variant="h5">
+                  |
+                </Typography>
+              </Box>
+              {buttons.map((text, i) => (
+                <Button key={i} onClick={props.onClick(text)}>
+                  <Typography className="lower-case" style={{ marginRight: 10 }} color={color} variant="h5">
+                    {text}
+                  </Typography>
+                </Button>
+              ))}
+            </Toolbar>
+          </AppBar>
+        </Slide>
+    );
+}

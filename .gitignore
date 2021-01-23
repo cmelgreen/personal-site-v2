@@ -1,0 +1,4 @@
+*node_modules*
+*terraform*
+frontend/build
+.eslintcache
