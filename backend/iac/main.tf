@@ -144,7 +144,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy" "codebuild_role_policy" {
-  role = aws_iam_role.example.name
+  role = aws_iam_role.codebuild_iam_role.name
 
   policy = <<POLICY
 {
@@ -180,7 +180,7 @@ resource "aws_codebuild_project" "site_codebuild" {
   name          = "site-codebuild"
   description   = "test_site_codebuild_project"
   build_timeout = "5"
-  service_role  = aws_iam_role.codebuild_role_policy.arn
+  service_role  = aws_iam_role.codebuild_iam_role.arn
 
   artifacts {
     type = "S3"
