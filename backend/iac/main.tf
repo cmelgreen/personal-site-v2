@@ -188,6 +188,7 @@ resource "aws_codebuild_project" "site_codebuild" {
     location = aws_s3_bucket.site_bucket.bucket
     namespace_type = "NONE"
     packaging = "NONE"
+    encryption_disabled = true
   }
 
   environment {
