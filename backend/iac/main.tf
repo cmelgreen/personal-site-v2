@@ -209,7 +209,7 @@ resource "aws_codebuild_project" "site_codebuild" {
     type            = "GITHUB"
     location        = "https://github.com/cmelgreen/personal-site-v2"
     git_clone_depth = 1
-    buildspec = "buildspec-frontend.yml"
+    buildspec = "frontend/buildspec.yml"
 
     auth {
       type = "OAUTH"
@@ -222,42 +222,38 @@ resource "aws_codebuild_webhook" "webhook" {
   branch_filter = "master"
 }
 
-# resource "aws_codebuild_project" "backend_codebuild" {
-#   name          = "site-backend-codebuild"
-#   description   = "test_backend_codebuild_project"
-#   build_timeout = "5"
-#   service_role  = aws_iam_role.codebuild_iam_role.arn
+resource "aws_codebuild_project" "backend_codebuild" {
+  name          = "site-backend-codebuild"
+  description   = "test_backend_codebuild_project"
+  build_timeout = "5"
+  service_role  = aws_iam_role.codebuild_iam_role.arn
 
-#   artifacts {
-#     type = "S3"
-#     name = "."
-#     location = aws_s3_bucket.site_bucket.bucket
-#     namespace_type = "NONE"
-#     packaging = "NONE"
-#     encryption_disabled = true
-#   }
+  artifacts {
+    type = "NO_ARTIFACTS"
+  }
 
-#   environment {
-#     compute_type                = "BUILD_GENERAL1_LARGE"
-#     image                       = "aws/codebuild/standard:1.0"
-#     type                        = "LINUX_CONTAINER"
-#     image_pull_credentials_type = "CODEBUILD"
-#   }
+  environment {
+    compute_type                = "BUILD_GENERAL1_LARGE"
+    image                       = "aws/codebuild/standard:1.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+  }
 
-#   logs_config {
-#     cloudwatch_logs {
-#       group_name  = "log-group"
-#       stream_name = "log-stream"
-#     }
-#   }
+  logs_config {
+    cloudwatch_logs {
+      group_name  = "log-group"
+      stream_name = "log-stream"
+    }
+  }
 
-#   source {
-#     type            = "GITHUB"
-#     location        = "https://github.com/cmelgreen/personal-site-v2"
-#     git_clone_depth = 1
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/cmelgreen/personal-site-v2"
+    git_clone_depth = 1
+    buildspec       = "backend/buildspec.yml"
 
-#     auth {
-#       type = "OAUTH"
-#     }
-#   }
-# }
+    auth {
+      type = "OAUTH"
+    }
+  }
+}
