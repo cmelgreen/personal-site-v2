@@ -257,3 +257,8 @@ resource "aws_codebuild_project" "backend_codebuild" {
     }
   }
 }
+
+resource "aws_codebuild_webhook" "backend_webhook" {
+  project_name = aws_codebuild_project.site_backend_codebuild.name
+  branch_filter = "master"
+}
