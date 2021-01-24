@@ -209,6 +209,14 @@ resource "aws_codebuild_project" "site_codebuild" {
     type            = "GITHUB"
     location        = "https://github.com/cmelgreen/personal-site-v2"
     git_clone_depth = 1
-  }
 
+    auth {
+      type = "OAUTH"
+    }
+  }
+}
+
+resource "aws_codebuild_webhook" "webhook" {
+  project_name = aws_codebuild_project.site_codebuild.name
+  branch_filter = "master"
 }
