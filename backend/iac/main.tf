@@ -1,9 +1,14 @@
 provider "aws" {
-    region = "us-east-2"
+    region = "us-east-1"
+}
+
+provider "github" {
+	token = file("github_credentials")
+	owner = "cmelgreen"
 }
 
 resource "aws_s3_bucket" "site_bucket" {
-  bucket = "cmelgreen-test-site-bucket"
+  bucket = "cm-personal-site-bucket"
   acl    = "public-read"
   policy = <<POLICY
 {
@@ -14,7 +19,7 @@ resource "aws_s3_bucket" "site_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::cmelgreen-test-site-bucket/*"
+            "Resource": "arn:aws:s3:::cm-personal-site-bucket/*"
         }
     ]
 }
@@ -176,6 +181,10 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
 POLICY
 }
 
+locals {
+  github_repo = "https://github.com/cmelgreen/personal-site-v2"
+}
+
 resource "aws_codebuild_project" "site_codebuild" {
   name          = "site-codebuild"
   description   = "test_site_codebuild_project"
@@ -207,7 +216,7 @@ resource "aws_codebuild_project" "site_codebuild" {
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/cmelgreen/personal-site-v2"
+    location        = local.github_repo
     git_clone_depth = 1
     buildspec = "frontend/buildspec.yml"
 
@@ -217,10 +226,10 @@ resource "aws_codebuild_project" "site_codebuild" {
   }
 }
 
-resource "aws_codebuild_webhook" "webhook" {
-  project_name = aws_codebuild_project.site_codebuild.name
-  branch_filter = "master"
-}
+# resource "aws_codebuild_webhook" "webhook" {
+#   project_name = aws_codebuild_project.site_codebuild.name
+#   branch_filter = "master"
+# }
 
 resource "aws_codebuild_project" "backend_codebuild" {
   name          = "site-backend-codebuild"
@@ -268,11 +277,11 @@ resource "aws_codedeploy_app" "backend_app" {
     name                    = "backend-app"
 }
 
-resource "aws_s3_bucket" "backend_bucket" {
-    bucket                  = "cmelgreen-backend-bucket"
+resource "aws_s3_bucket" "codepipeline_bucket" {
+    bucket                  = "cmelgreen-personal-site-pipeline-bucket"
 }
 
-resource "aws_codedeploy_deployment_group" "site-deployment-group" {
+resource "aws_codedeploy_deployment_group" "backend_deployment_group" {
     deployment_group_name   = "${aws_codedeploy_app.backend_app.name}-group"
     app_name                = aws_codedeploy_app.backend_app.name
 
@@ -450,7 +459,7 @@ resource "aws_subnet" "public_subnet" {
     vpc_id                  = aws_vpc.vpc.id
     cidr_block              = "10.0.1.0/24"
     map_public_ip_on_launch = true
-    availability_zone       = "us-east-2a"
+    availability_zone       = "us-east-1a"
 }
 
 resource "aws_route_table" "public_rtb" {
@@ -472,8 +481,8 @@ resource "aws_security_group" "public_http_sg" {
 
     vpc_id = aws_vpc.vpc.id
 
-    ingress { 
-        from_port   = 22    
+    ingress {
+        from_port   = 22
         to_port     = 22
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
@@ -492,4 +501,157 @@ resource "aws_security_group" "public_http_sg" {
 		protocol    = "-1"
 		cidr_blocks = ["0.0.0.0/0"]
 	}
+}
+
+############################################################
+
+resource "aws_codepipeline" "codepipeline" {
+  name     = "cmelgreen-site-pipeline"
+  role_arn = aws_iam_role.codepipeline_role.arn
+
+  artifact_store {
+    location = aws_s3_bucket.codepipeline_bucket.bucket
+    type     = "S3"
+  }
+
+  stage {
+    name = "Source"
+
+    action {
+      name             = "Source"
+      category         = "Source"
+      owner            = "ThirdParty"
+      provider         = "Github"
+      version          = "2"
+      output_artifacts = ["source_output"]
+
+      configuration = {
+        Owner             = "cmelgreen"
+        Repo              = "personal-site-v2"
+        Branch            = "master"
+      }
+    }
+  }
+
+  stage {
+    name = "Build"
+
+    action {
+      name             = "Build"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["build_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = aws_codebuild_project.backend_codebuild.name
+      }
+    }
+  }
+
+  stage {
+    name = "Deploy"
+
+    action {
+      name            = "Deploy"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      input_artifacts = ["build_output"]
+      version         = "1"
+
+      configuration = {
+          ApplicationName = aws_codedeploy_app.backend_app.name
+          DeploymentGroupName = aws_codedeploy_deployment_group.backend_deployment_group.deployment_group_name
+      }
+    }
+  }
+}
+
+resource "aws_iam_role" "codepipeline_role" {
+  name = "codepipeline-role"
+
+  assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "codepipeline.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy" "codepipeline_policy" {
+  name = "codepipeline-policy"
+  role = aws_iam_role.codepipeline_role.id
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect":"Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:GetBucketVersioning",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "${aws_s3_bucket.codepipeline_bucket.arn}",
+        "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "codebuild:StartBuild"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+POLICY
+}
+
+locals {
+  webhook_secret = "super-secret"
+}
+
+resource "aws_codepipeline_webhook" "codepipeline_webhook" {
+  name            = "test-webhook-github-bar"
+  authentication  = "GITHUB_HMAC"
+  target_action   = "Source"
+  target_pipeline = aws_codepipeline.codepipeline.name
+
+  authentication_configuration {
+    secret_token = local.webhook_secret
+  }
+
+  filter {
+    json_path    = "$.ref"
+    match_equals = "refs/heads/{Branch}"
+  }
+}
+
+# Wire the CodePipeline webhook into a GitHub repository.
+resource "github_repository_webhook" "bar" {
+  repository = local.github_repo
+
+  configuration {
+    url          = aws_codepipeline_webhook.codepipeline_webhook.url
+    content_type = "json"
+    insecure_ssl = true
+    secret       = local.webhook_secret
+  }
+
+  events = ["push"]
 }
