@@ -257,3 +257,239 @@ resource "aws_codebuild_project" "backend_codebuild" {
     }
   }
 }
+
+resource "aws_codebuild_webhook" "backend_webhook" {
+  project_name = aws_codebuild_project.backend_codebuild.name
+  branch_filter = "master"
+}
+
+
+resource "aws_codedeploy_app" "backend_app" {
+    name                    = "backend-app"
+}
+
+resource "aws_s3_bucket" "backend_bucket" {
+    bucket                  = "cmelgreen-backend-bucket"
+}
+
+resource "aws_codedeploy_deployment_group" "site-deployment-group" {
+    deployment_group_name   = "${aws_codedeploy_app.backend_app.name}-group"
+    app_name                = aws_codedeploy_app.backend_app.name
+
+    service_role_arn        = aws_iam_role.codedeploy_iam_role.arn
+    autoscaling_groups      = [aws_autoscaling_group.backend_asg.name]
+
+    auto_rollback_configuration {
+        enabled             = true
+        events              = ["DEPLOYMENT_FAILURE"]
+    }
+}
+
+resource "aws_autoscaling_group" "backend_asg" {
+    name                        = "backend-asg"
+
+    min_size                    = 1
+    max_size                    = 1
+    desired_capacity            = 1
+
+    health_check_grace_period   = 30
+    health_check_type           = "EC2"
+    force_delete                = true
+
+    launch_configuration        = aws_launch_configuration.backend_lc.name
+    vpc_zone_identifier         = [aws_subnet.public_subnet.id]
+
+    load_balancers              = [aws_elb.backend_elb.name]
+}
+
+resource "aws_launch_configuration" "backend_lc" {
+    name                        = "backend-lc-${formatdate("YY-MM-DD-HH-mm", timestamp())}"
+
+    image_id                    = "ami-0a91cd140a1fc148a"
+    instance_type               = "t2.nano"
+    user_data                   = "docker run -p 80:80 nginx"
+
+    security_groups             = [aws_security_group.public_http_sg.id]
+    iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
+    key_name                    = "zoff2"
+
+    associate_public_ip_address = true
+
+    root_block_device {
+        volume_type             = "gp2"
+        volume_size             = 30
+    }
+
+    lifecycle {
+        // AWS throws an error if false
+        create_before_destroy   = true
+    }
+}
+
+resource "aws_elb" "backend_elb" {
+    name                        = "backend-elb"
+    security_groups             = [aws_security_group.public_http_sg.id]
+    subnets                     = [aws_subnet.public_subnet.id]
+
+    listener {
+        lb_port                 = 80
+        lb_protocol             = "HTTP"
+        instance_port           = 80
+        instance_protocol       = "HTTP"
+    }
+
+    health_check {
+        healthy_threshold       = 2
+        unhealthy_threshold     = 2
+        timeout                 = 3
+        interval                = 30
+        target                  = "HTTP:80/"
+    }
+}
+
+resource "aws_iam_role" "backend_iam_role" {
+    name                        = "backend-iam-role"
+    force_detach_policies       = true
+
+    assume_role_policy          = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+          "Service": [
+          "ec2.amazonaws.com"
+          ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_instance_profile" "backend_iam_profile" {
+    name                        = "backend-iam-profile"
+    role                        = aws_iam_role.backend_iam_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "backend_iam_policy_attachments" {
+    for_each  = toset([
+      "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy",
+      "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+    ])
+
+    policy_arn                  = each.value
+    role                        = aws_iam_role.backend_iam_role.name
+}
+
+resource "aws_iam_role" "codedeploy_iam_role" {
+    name                        = "codedeploy-iam-role"
+    force_detach_policies       = true
+
+    assume_role_policy          = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "codedeploy.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+          "Service": [
+          "ec2.amazonaws.com"
+          ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_instance_profile" "codedeploy_iam_profile" {
+    name                        = "codedeploy-iam-profile"
+    role                        = aws_iam_role.codedeploy_iam_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "codedeploy_iam_policy_attachments" {
+    for_each  = toset([
+      "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy",
+      "arn:aws:iam::aws:policy/AWSCodeDeployDeployerAccess",
+      "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
+    ])
+
+    policy_arn                  = each.value
+    role                        = aws_iam_role.codedeploy_iam_role.name
+}
+
+resource "aws_vpc" "vpc" {
+    cidr_block              = "10.0.0.0/16"
+    enable_dns_support      = true
+    enable_dns_hostnames    = true
+
+    tags = {
+        Name = "ctx-defs-aas-vpc"
+    }
+}
+
+resource "aws_internet_gateway" "igw" {
+    vpc_id          = aws_vpc.vpc.id
+}
+
+resource "aws_subnet" "public_subnet" {
+    vpc_id                  = aws_vpc.vpc.id
+    cidr_block              = "10.0.1.0/24"
+    map_public_ip_on_launch = true
+    availability_zone       = "us-east-2a"
+}
+
+resource "aws_route_table" "public_rtb" {
+    vpc_id          = aws_vpc.vpc.id
+
+    route {
+        cidr_block  = "0.0.0.0/0"
+        gateway_id  = aws_internet_gateway.igw.id
+    }
+}
+
+resource "aws_route_table_association" "public_route_assosciation" {
+    route_table_id  = aws_route_table.public_rtb.id
+    subnet_id       = aws_subnet.public_subnet.id
+}
+
+resource "aws_security_group" "public_http_sg" {
+	name        = "public_http_sg"
+
+    vpc_id = aws_vpc.vpc.id
+
+    ingress { 
+        from_port   = 22    
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+	ingress {
+		from_port   = 80
+		to_port     = 80
+		protocol    = "tcp"
+		cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	egress {
+		from_port   = 0
+		to_port     = 0
+		protocol    = "-1"
+		cidr_blocks = ["0.0.0.0/0"]
+	}
+}
