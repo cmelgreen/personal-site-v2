@@ -3,8 +3,8 @@ provider "aws" {
 }
 
 provider "github" {
-	token = file("github_credentials")
-	owner = "cmelgreen"
+	token = file("credentials")
+	//owner = "cmelgreen"
 }
 
 resource "aws_s3_bucket" "site_bucket" {
@@ -171,10 +171,7 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
       "Action": [
         "s3:*"
       ],
-      "Resource": [
-        "${aws_s3_bucket.site_bucket.arn}",
-        "${aws_s3_bucket.site_bucket.arn}/*"
-      ]
+      "Resource": "*"
     }
   ]
 }
@@ -185,46 +182,46 @@ locals {
   github_repo = "https://github.com/cmelgreen/personal-site-v2"
 }
 
-resource "aws_codebuild_project" "site_codebuild" {
-  name          = "site-codebuild"
-  description   = "test_site_codebuild_project"
-  build_timeout = "5"
-  service_role  = aws_iam_role.codebuild_iam_role.arn
+# resource "aws_codebuild_project" "site_codebuild" {
+#   name          = "site-codebuild"
+#   description   = "test_site_codebuild_project"
+#   build_timeout = "5"
+#   service_role  = aws_iam_role.codebuild_iam_role.arn
 
-  artifacts {
-    type = "S3"
-    name = "."
-    location = aws_s3_bucket.site_bucket.bucket
-    namespace_type = "NONE"
-    packaging = "NONE"
-    encryption_disabled = true
-  }
+#   artifacts {
+#     type = "S3"
+#     name = "."
+#     location = aws_s3_bucket.site_bucket.bucket
+#     namespace_type = "NONE"
+#     packaging = "NONE"
+#     encryption_disabled = true
+#   }
 
-  environment {
-    compute_type                = "BUILD_GENERAL1_LARGE"
-    image                       = "aws/codebuild/standard:1.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-  }
+#   environment {
+#     compute_type                = "BUILD_GENERAL1_LARGE"
+#     image                       = "aws/codebuild/standard:1.0"
+#     type                        = "LINUX_CONTAINER"
+#     image_pull_credentials_type = "CODEBUILD"
+#   }
 
-  logs_config {
-    cloudwatch_logs {
-      group_name  = "log-group"
-      stream_name = "log-stream"
-    }
-  }
+#   logs_config {
+#     cloudwatch_logs {
+#       group_name  = "log-group"
+#       stream_name = "log-stream"
+#     }
+#   }
 
-  source {
-    type            = "GITHUB"
-    location        = local.github_repo
-    git_clone_depth = 1
-    buildspec = "frontend/buildspec.yml"
+#   source {
+#     type            = "GITHUB"
+#     location        = local.github_repo
+#     git_clone_depth = 1
+#     buildspec = "frontend/buildspec.yml"
 
-    auth {
-      type = "OAUTH"
-    }
-  }
-}
+#     auth {
+#       type = "OAUTH"
+#     }
+#   }
+# }
 
 # resource "aws_codebuild_webhook" "webhook" {
 #   project_name = aws_codebuild_project.site_codebuild.name
@@ -233,12 +230,12 @@ resource "aws_codebuild_project" "site_codebuild" {
 
 resource "aws_codebuild_project" "backend_codebuild" {
   name          = "site-backend-codebuild"
-  description   = "test_backend_codebuild_project"
+  description   = "backend_codebuild_project"
   build_timeout = "5"
   service_role  = aws_iam_role.codebuild_iam_role.arn
 
   artifacts {
-    type = "NO_ARTIFACTS"
+    type = "CODEPIPELINE"
   }
 
   environment {
@@ -256,21 +253,15 @@ resource "aws_codebuild_project" "backend_codebuild" {
   }
 
   source {
-    type            = "GITHUB"
-    location        = "https://github.com/cmelgreen/personal-site-v2"
-    git_clone_depth = 1
+    type            = "CODEPIPELINE"
     buildspec       = "backend/buildspec.yml"
-
-    auth {
-      type = "OAUTH"
-    }
   }
 }
 
-resource "aws_codebuild_webhook" "backend_webhook" {
-  project_name = aws_codebuild_project.backend_codebuild.name
-  branch_filter = "master"
-}
+# resource "aws_codebuild_webhook" "backend_webhook" {
+#   project_name = aws_codebuild_project.backend_codebuild.name
+#   branch_filter = "master"
+# }
 
 
 resource "aws_codedeploy_app" "backend_app" {
@@ -314,13 +305,13 @@ resource "aws_autoscaling_group" "backend_asg" {
 resource "aws_launch_configuration" "backend_lc" {
     name                        = "backend-lc-${formatdate("YY-MM-DD-HH-mm", timestamp())}"
 
-    image_id                    = "ami-0a91cd140a1fc148a"
+    image_id                    = "ami-0885b1f6bd170450c"
     instance_type               = "t2.nano"
     user_data                   = "docker run -p 80:80 nginx"
 
     security_groups             = [aws_security_group.public_http_sg.id]
     iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
-    key_name                    = "zoff2"
+    key_name                    = "zoff3"
 
     associate_public_ip_address = true
 
@@ -520,16 +511,22 @@ resource "aws_codepipeline" "codepipeline" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "Github"
-      version          = "2"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
+      version          = "1"
       output_artifacts = ["source_output"]
 
       configuration = {
-        Owner             = "cmelgreen"
-        Repo              = "personal-site-v2"
-        Branch            = "master"
+        ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
+        FullRepositoryId = "cmelgreen/personal-site-v2"
+        BranchName       = "master"
       }
+
+      # configuration = {
+      #   Owner             = "cmelgreen"
+      #   Repo              = "personal-site-v2"
+      #   Branch            = "master"
+      # }
     }
   }
 
@@ -558,7 +555,7 @@ resource "aws_codepipeline" "codepipeline" {
       name            = "Deploy"
       category        = "Deploy"
       owner           = "AWS"
-      provider        = "CodeBuild"
+      provider        = "CodeDeploy"
       input_artifacts = ["build_output"]
       version         = "1"
 
@@ -600,10 +597,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
     {
       "Effect":"Allow",
       "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion",
-        "s3:GetBucketVersioning",
-        "s3:PutObject"
+        "s3:*"
       ],
       "Resource": [
         "${aws_s3_bucket.codepipeline_bucket.arn}",
@@ -613,45 +607,54 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
     {
       "Effect": "Allow",
       "Action": [
-        "codebuild:StartBuild"
+        "codebuild:*"
       ],
       "Resource": "*"
-    }
+    },{
+      "Effect": "Allow",
+      "Action": "codestar-connections:*",
+      "Resource": "*"
+        }
   ]
 }
 POLICY
 }
 
-locals {
-  webhook_secret = "super-secret"
+# locals {
+#   webhook_secret = "super-secret"
+# }
+
+# resource "aws_codepipeline_webhook" "codepipeline_webhook" {
+#   name            = "test-webhook-github-bar"
+#   authentication  = "GITHUB_HMAC"
+#   target_action   = "Source"
+#   target_pipeline = aws_codepipeline.codepipeline.name
+
+#   authentication_configuration {
+#     secret_token = local.webhook_secret
+#   }
+
+#   filter {
+#     json_path    = "$.ref"
+#     match_equals = "refs/heads/{Branch}"
+#   }
+# }
+
+resource "aws_codestarconnections_connection" "github_connection" {
+  name          = "github-connection"
+  provider_type = "GitHub"
 }
 
-resource "aws_codepipeline_webhook" "codepipeline_webhook" {
-  name            = "test-webhook-github-bar"
-  authentication  = "GITHUB_HMAC"
-  target_action   = "Source"
-  target_pipeline = aws_codepipeline.codepipeline.name
+# # Wire the CodePipeline webhook into a GitHub repository.
+# resource "github_repository_webhook" "bar" {
+#   repository = local.github_repo
 
-  authentication_configuration {
-    secret_token = local.webhook_secret
-  }
+#   configuration {
+#     url          = aws_codepipeline_webhook.codepipeline_webhook.url
+#     content_type = "json"
+#     insecure_ssl = true
+#     secret       = local.webhook_secret
+#   }
 
-  filter {
-    json_path    = "$.ref"
-    match_equals = "refs/heads/{Branch}"
-  }
-}
-
-# Wire the CodePipeline webhook into a GitHub repository.
-resource "github_repository_webhook" "bar" {
-  repository = local.github_repo
-
-  configuration {
-    url          = aws_codepipeline_webhook.codepipeline_webhook.url
-    content_type = "json"
-    insecure_ssl = true
-    secret       = local.webhook_secret
-  }
-
-  events = ["push"]
-}
+#   events = ["push"]
+# }
