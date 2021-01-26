@@ -5,9 +5,10 @@ phases:
 
   build:
     commands:
-      - cd backend
+      - cd backend/go
       - go build
 artifacts:
   files:
     - '**/*'
-  base-directory: frontend/build
+    
+  base-directory: backend/build/go
