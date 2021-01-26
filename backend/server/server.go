@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"log"
@@ -16,5 +16,5 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	http.ServeFile(w, r, "index.html")
+	w.Write([]byte("Hello World"))
 }
