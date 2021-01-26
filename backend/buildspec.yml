@@ -14,5 +14,6 @@ artifacts:
   files:
     - 'server/server'
     - 'appspec.yml'
+    - 'scripts/*'
   base-directory: backend
   discard-paths: yes
