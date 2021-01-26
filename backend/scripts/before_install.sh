@@ -2,4 +2,4 @@
 
 sudo rm -rf /scripts
 sudo mkdir /scripts
-sudo rm server
+sudo rm -f /server
