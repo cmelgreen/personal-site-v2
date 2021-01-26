@@ -1,4 +1,5 @@
 version: 0.2
+
 phases:
   # pre_build:
   #   commands:
@@ -10,5 +11,5 @@ phases:
 artifacts:
   files:
     - '**/*'
-    
+
   base-directory: backend/build/go
