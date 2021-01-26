@@ -1,15 +1,18 @@
 version: 0.2
 
 phases:
-  # pre_build:
-  #   commands:
-
-  build:
+  pre_build:
     commands:
       - cd backend/server
       - go get -d ./...
-      - go build
+
+  build:
+    commands:
+      - go build -o server *.go
+
 artifacts:
   files:
-    - '**/*'
+    - 'server/server'
+    - 'appspec.yml'
   base-directory: backend
+  discard-paths: yes
