@@ -13,4 +13,4 @@ artifacts:
   files:
     - '**/*'
 
-  base-directory: backend/build/go
+  base-directory: backend/go
