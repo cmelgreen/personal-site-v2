@@ -305,7 +305,7 @@ resource "aws_autoscaling_group" "backend_asg" {
 resource "aws_launch_configuration" "backend_lc" {
     name                        = "backend-lc-${formatdate("YY-MM-DD-HH-mm", timestamp())}"
 
-    image_id                    = "ami-0885b1f6bd170450c"
+    image_id                    = "ami-0be2609ba883822ec"
     instance_type               = "t2.nano"
     user_data                   = "docker run -p 80:80 nginx"
 
