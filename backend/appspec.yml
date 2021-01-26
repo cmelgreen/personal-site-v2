@@ -2,14 +2,14 @@ version: 0.0
 os: linux
 
 files:
-  - source: backend/server
-    destination: /backend
+  - source: server/server
+    destination: /
   - source: scripts/
     destination: /scripts
 
 hooks:
-  # ApplicationStop:
-  #   - location: scripts/stop_server.sh
+  ApplicationStop:
+    - location: scripts/stop_server.sh
   BeforeInstall:
     - location: scripts/before_install.sh
   ApplicationStart:
