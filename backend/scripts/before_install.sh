@@ -1,4 +1,5 @@
 #!/bin/bash
 
-sudo rm -rf /backend
-sudo mkdir /backend 
+sudo rm -rf /scripts
+sudo mkdir /scripts
+sudo rm server
