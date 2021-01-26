@@ -6,11 +6,10 @@ phases:
 
   build:
     commands:
-      - cd backend/go
+      - cd backend/server
       - go get -d ./...
       - go build
 artifacts:
   files:
     - '**/*'
-
-  base-directory: backend/go
+  base-directory: backend

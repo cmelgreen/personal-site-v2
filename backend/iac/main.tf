@@ -614,7 +614,13 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
       "Effect": "Allow",
       "Action": "codestar-connections:*",
       "Resource": "*"
-        }
+    },{
+      "Effect": "Allow",
+      "Action": [
+        "codedeploy:*"
+      ],
+      "Resource": "*"
+    }
   ]
 }
 POLICY
