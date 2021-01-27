@@ -1,4 +1,5 @@
 import React from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import Box from '@material-ui/core/Box'
 import Button from "@material-ui/core/Button";
@@ -20,8 +21,9 @@ export function Header (props) {
 
     const buttons = ["DevOps", "Backend", "Frontend"];
   
-    const color = props.primary ? "primary" : "textPrimary";
-    const bgColor = props.primary ? "transparent" : "default";
+    const color = useToggleAfterInitialRender(props.primary, 'primary', 'textPrimary') 
+    const bgColor = useToggleAfterInitialRender(props.primary, 'transparent', 'default')
+
   
     const classes = makeStyles((theme) => ({
       name: {
@@ -58,4 +60,25 @@ export function Header (props) {
           </AppBar>
         </Slide>
     );
+}
+
+// TO-DO: check if useReducer is better pattern
+const useToggleAfterInitialRender = (bool, value1, value2) => {
+  const [state, setState] = useState()
+  const firstMount = !useDidMount()
+
+  useEffect(() => {
+    console.log(firstMount)
+    setState(bool || firstMount ? value1 : value2)
+  }, [bool])
+
+  return state
+}
+
+function useDidMount() {
+  const mountRef = useRef(false);
+
+  useEffect(() => { mountRef.current = true }, []);
+
+  return mountRef.current;
 }

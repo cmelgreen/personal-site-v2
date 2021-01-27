@@ -182,46 +182,36 @@ locals {
   github_repo = "https://github.com/cmelgreen/personal-site-v2"
 }
 
-# resource "aws_codebuild_project" "site_codebuild" {
-#   name          = "site-codebuild"
-#   description   = "test_site_codebuild_project"
-#   build_timeout = "5"
-#   service_role  = aws_iam_role.codebuild_iam_role.arn
+resource "aws_codebuild_project" "site_codebuild" {
+  name          = "site-codebuild"
+  description   = "test_site_codebuild_project"
+  build_timeout = "5"
+  service_role  = aws_iam_role.codebuild_iam_role.arn
 
-#   artifacts {
-#     type = "S3"
-#     name = "."
-#     location = aws_s3_bucket.site_bucket.bucket
-#     namespace_type = "NONE"
-#     packaging = "NONE"
-#     encryption_disabled = true
-#   }
+  artifacts {
+    type = "CODEPIPELINE"
+  }
 
-#   environment {
-#     compute_type                = "BUILD_GENERAL1_LARGE"
-#     image                       = "aws/codebuild/standard:1.0"
-#     type                        = "LINUX_CONTAINER"
-#     image_pull_credentials_type = "CODEBUILD"
-#   }
+  environment {
+    compute_type                = "BUILD_GENERAL1_LARGE"
+    image                       = "aws/codebuild/standard:1.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+  }
 
-#   logs_config {
-#     cloudwatch_logs {
-#       group_name  = "log-group"
-#       stream_name = "log-stream"
-#     }
-#   }
+  logs_config {
+    cloudwatch_logs {
+      group_name  = "log-group"
+      stream_name = "log-stream"
+    }
+  }
 
-#   source {
-#     type            = "GITHUB"
-#     location        = local.github_repo
-#     git_clone_depth = 1
-#     buildspec = "frontend/buildspec.yml"
-
-#     auth {
-#       type = "OAUTH"
-#     }
-#   }
-# }
+  source {
+    type            = "CODEPIPELINE"
+    buildspec       = "frontend/buildspec.yml"
+  }
+  
+}
 
 # resource "aws_codebuild_webhook" "webhook" {
 #   project_name = aws_codebuild_project.site_codebuild.name
@@ -307,7 +297,7 @@ resource "aws_launch_configuration" "backend_lc" {
 
     image_id                    = "ami-0be2609ba883822ec"
     instance_type               = "t2.nano"
-    user_data                   = "docker run -p 80:80 nginx"
+    user_data                   = file("lc_user_data.sh")
 
     security_groups             = [aws_security_group.public_http_sg.id]
     iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
@@ -534,16 +524,30 @@ resource "aws_codepipeline" "codepipeline" {
     name = "Build"
 
     action {
-      name             = "Build"
+      name             = "Build-Backend"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
       input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      output_artifacts = ["backend_build_output"]
       version          = "1"
 
       configuration = {
         ProjectName = aws_codebuild_project.backend_codebuild.name
+      }
+    }
+
+    action {
+      name             = "Build-Frontend"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["frontend_build_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = aws_codebuild_project.site_codebuild.name
       }
     }
   }
@@ -552,11 +556,11 @@ resource "aws_codepipeline" "codepipeline" {
     name = "Deploy"
 
     action {
-      name            = "Deploy"
+      name            = "Deploy-Backend"
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeploy"
-      input_artifacts = ["build_output"]
+      input_artifacts = ["backend_build_output"]
       version         = "1"
 
       configuration = {
@@ -564,6 +568,31 @@ resource "aws_codepipeline" "codepipeline" {
           DeploymentGroupName = aws_codedeploy_deployment_group.backend_deployment_group.deployment_group_name
       }
     }
+
+    action {
+      name            = "Deploy-Frontend"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "S3"
+      input_artifacts = ["frontend_build_output"]
+      version         = "1"
+
+      configuration = {
+        BucketName = aws_s3_bucket.site_bucket.bucket
+        Extract = "true"
+      }
+    }
+
+      # artifacts {
+  #   type = "S3"
+  #   name = "."
+  #   location = aws_s3_bucket.site_bucket.bucket
+  #   namespace_type = "NONE"
+  #   packaging = "NONE"
+  #   encryption_disabled = true
+  # }
+
+
   }
 }
 
@@ -599,10 +628,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
       "Action": [
         "s3:*"
       ],
-      "Resource": [
-        "${aws_s3_bucket.codepipeline_bucket.arn}",
-        "${aws_s3_bucket.codepipeline_bucket.arn}/*"
-      ]
+      "Resource": "*"
     },
     {
       "Effect": "Allow",
@@ -626,41 +652,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
 POLICY
 }
 
-# locals {
-#   webhook_secret = "super-secret"
-# }
-
-# resource "aws_codepipeline_webhook" "codepipeline_webhook" {
-#   name            = "test-webhook-github-bar"
-#   authentication  = "GITHUB_HMAC"
-#   target_action   = "Source"
-#   target_pipeline = aws_codepipeline.codepipeline.name
-
-#   authentication_configuration {
-#     secret_token = local.webhook_secret
-#   }
-
-#   filter {
-#     json_path    = "$.ref"
-#     match_equals = "refs/heads/{Branch}"
-#   }
-# }
-
 resource "aws_codestarconnections_connection" "github_connection" {
   name          = "github-connection"
   provider_type = "GitHub"
 }
-
-# # Wire the CodePipeline webhook into a GitHub repository.
-# resource "github_repository_webhook" "bar" {
-#   repository = local.github_repo
-
-#   configuration {
-#     url          = aws_codepipeline_webhook.codepipeline_webhook.url
-#     content_type = "json"
-#     insecure_ssl = true
-#     secret       = local.webhook_secret
-#   }
-
-#   events = ["push"]
-# }
