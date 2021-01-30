@@ -16,11 +16,22 @@ import (
 // CreatePost creates
 func (db *Database) CreatePost(ctx context.Context, post *models.Post) error {
 	queries := []string{
-		``,
-		``,
+		`INSERT INTO post(title, slug, img, summary, content, raw_content) 
+		VALUES (:title, :slug, :img, :summary. :content, :raw_content));`,
+
+		`INSERT INTO tag(value)
+		VALUES (UNNEST(:tags.value))
+		ON CONFLICT DO NOTHING;`,
+
+		`INSERT INTO post_TAG
+		SELECT    p.id, t.id
+		FROM      post p
+		LEFT JOIN tag t
+		ON        t.value = ANY(:tags.value)
+		WHERE	  p.slug = :slug;`,
 	}
 
-	
+
 	return nil
 }
 
