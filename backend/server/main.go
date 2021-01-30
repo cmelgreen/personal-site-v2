@@ -76,5 +76,7 @@ func main() {
 	s.mux.GET(apiRoot+"/img/:img", serveDynamicImage())
 	s.log.Println("Serving")
 
+	//createDummyPost(ctx, s)
+
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }

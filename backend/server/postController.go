@@ -28,6 +28,7 @@ type RichTextHandler interface{
 
 func writeJSON(w http.ResponseWriter, message interface{}) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(message)
 }
 

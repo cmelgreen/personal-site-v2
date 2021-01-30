@@ -1,43 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
 import Typography from '@material-ui/core/Typography';
 import ContentCard from './ContentCard.js'
 import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
+import axios from 'axios'
 
 import { makeStyles } from "@material-ui/core/styles";
 import { FullscreenExit } from '@material-ui/icons';
 
 const ContentList = forwardRef((props, ref) => {
-  const posts = [{
-    title: "Automating Dev Environment Setup",
-    summary:
-      "Next time you blow up your environment restore it in one command with Ansible",
-    tags: ["ansible", "linux"],
-    category: 'DevOps',
-    media: require('../media/ansible.png')
-  },
-  {
-    title: 'Reproducible CI/CD Pipelines',
-    summary: 'Use Pipelines and Jenkins-configuration-as-Code to skip the manual setup',
-    tags: ['jenkins', 'ci/cd'],
-    category: 'DevOps',
-    media: require('../media/jenkins.png')
-  },
-  {
-    title: 'React & Go I: A simple server',
-    summary: 'Getting your feet wet using Go and React together',
-    category: 'Backend',
-    tags: ['go', 'react'],
-    media: require('../media/go-with-react.png')
-  },
-  {
-    title: 'React & Go II: React Router and APIs',
-    summary: 'Building complex interactions with React and Go',
-    category: 'Backend',
-    tags: ['go', 'react'],
-    media: require('../media/go-with-react.png')
-  }];
+  const posts = usePostSummaries()
 
   const useStyles = makeStyles((theme) => ({
     contentGrid: {
@@ -76,5 +49,21 @@ const ContentList = forwardRef((props, ref) => {
     </Grid>
   )
 })
+
+const apiPostSummaries = "http://localhost:8080/api/post-summaries"
+
+export const usePostSummaries = (numPosts=10) => {
+  const [posts, setPosts] = useState([])
+
+  useEffect(() => {
+    axios.get(apiPostSummaries, {params: {numPosts}})
+      .then(resp => {
+        console.log(resp)
+        if ( resp.data.posts ) setPosts(resp.data.posts)})
+      .catch(() => setPosts([]))
+  }, [])
+
+  return posts
+}
 
 export default ContentList

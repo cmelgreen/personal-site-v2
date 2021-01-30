@@ -51,12 +51,10 @@ func serveDynamicImage() httprouter.Handle {
 		sizeStart := strings.LastIndex(img, "-")
 		sizeEnd := len(img)-4
 		size := img[sizeStart+1:sizeEnd]
-		fmt.Println(size)
 
 		if _, ok := breakpoints[size]; ok {
 			img = img[:sizeStart] + img[sizeEnd:]
 		} 
-		fmt.Println(img)
 
 		p := "media/" + img
 
@@ -65,6 +63,11 @@ func serveDynamicImage() httprouter.Handle {
 			fmt.Println(err)
 		}
 
+		var format vips.ImageType
+		if img[sizeEnd:] == ".png" {
+			format = vips.PNG
+		}
+		
 		options := vips.Options{
 			Width:        breakpoints[size].size,
 			Height:       breakpoints[size].size,
@@ -73,6 +76,7 @@ func serveDynamicImage() httprouter.Handle {
 			Interpolator: vips.BILINEAR,
 			Gravity:      vips.CENTRE,
 			Quality:      breakpoints[size].quality,
+			Format:		  format,
 		}
 		inBuf, _ := ioutil.ReadAll(f)
 		buf, err := vips.Resize(inBuf, options)

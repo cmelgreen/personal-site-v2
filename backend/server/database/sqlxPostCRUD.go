@@ -139,10 +139,14 @@ func (db *Database) GetTagsBySlug(ctx context.Context, slug string) *models.Tags
 		return &models.Tags{}
 	}
 	
-	err = rows.StructScan(&tags)
-	if err != nil {
-		fmt.Println(err)
-		return &models.Tags{}
+	for rows.Next() {
+		var s string
+		err = rows.Scan(&s)
+		if err != nil {
+			fmt.Println(err)
+			return &models.Tags{}
+		}
+		tags = append(tags, s)
 	}
 
 	return &models.Tags{Values: tags}

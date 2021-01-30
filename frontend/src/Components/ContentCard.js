@@ -17,6 +17,8 @@ export default function ContentCard(props) {
   const popOff = props.popOff ? props.popOff : 0;
   const [pop, setPop] = useState(popOff);
 
+  const apiRoot = "http://localhost:8080/api/img/"
+
   const accentOn = "secondary";
   const accentOff = "textPrimary";
   const [titleColor, setTitleColor] = useState(accentOff);
@@ -105,7 +107,7 @@ export default function ContentCard(props) {
                   </CardContent>
                   </Grid>
                 <Grid item xs={4}>
-                  <CardMedia className={classes.media} image={props.post.media} />
+                  <CardMedia className={classes.media} image={apiRoot + props.post.img} />
                 </Grid>
               </Grid>
             </MouseInOut>
@@ -123,7 +125,7 @@ const Tags = (props) => {
   if (props.tags) {
     return (
       <div className="tags">
-        {props.tags.map((tag, i) => (
+        {props.tags.value.map((tag, i) => (
           <Button key={i}>{tag}</Button>
         ))}
       </div>
