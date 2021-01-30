@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"path"
+	//"path"
 	"strings"
 
 	//"io"
@@ -28,7 +28,6 @@ type breakpoint struct{
 	quality int
 }
 
-
 func uploadImage(db map[string]string, dir string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		//r.ParseMultipartForm(32 << 20)
@@ -45,20 +44,21 @@ func uploadImage(db map[string]string, dir string) httprouter.Handle {
 	}
 }
 
-func handleImage(db map[string]string) httprouter.Handle {
+func serveDynamicImage() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		img := params.ByName("img")
 
-		sizeIndex := strings.LastIndex(img, "-")
-		ext := path.Ext(img)
+		sizeStart := strings.LastIndex(img, "-")
+		sizeEnd := len(img)-4
+		size := img[sizeStart+1:sizeEnd]
+		fmt.Println(size)
 
-		size := strings.Trim(img[sizeIndex+1:], ext)
 		if _, ok := breakpoints[size]; ok {
-			img = img[:sizeIndex] + ext
-		}
+			img = img[:sizeStart] + img[sizeEnd:]
+		} 
+		fmt.Println(img)
 
-		p := db[img]
-
+		p := "media/" + img
 
 		f, err := os.Open(p)
 		if err != nil {
@@ -83,7 +83,7 @@ func handleImage(db map[string]string) httprouter.Handle {
 
 		contentType := http.DetectContentType(buf)
 		fmt.Println(contentType)
-
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", contentType)
 		w.Write(buf)
 	}

@@ -16,8 +16,8 @@ const (
 	timeout = 10
 
 	// Default environment variable for serving and default port
-	portEnvVar  = "PORT"
-	defaultPort = ":80"
+	portEnvVar  = "PERSONAL_SITE_PORT"
+	defaultPort = ":8080"
 	frontendDir = "/frontend/static"
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
@@ -40,12 +40,20 @@ func main() {
 	s := newServer(ctx)
 
 	// Setup DB for API
-	dbConfig := database.DBConfigFromAWS{
-		BaseAWSRegion:  baseAWSRegion,
-		BaseAWSRoot:    baseAWSRoot,
-		BaseConfigName: baseConfigName,
-		BaseConfigPath: baseConfigPath,
-		WithEncrpytion: withEncrpytion,
+	// dbConfig := database.DBConfigFromAWS{
+	// 	BaseAWSRegion:  baseAWSRegion,
+	// 	BaseAWSRoot:    baseAWSRoot,
+	// 	BaseConfigName: baseConfigName,
+	// 	BaseConfigPath: baseConfigPath,
+	// 	WithEncrpytion: withEncrpytion,
+	// }
+
+	dbConfig := database.DBConfigFromValues{
+		Database: "postgres",
+		Host: "localhost",
+		Port: "5432",
+		User: "postgres",
+		Password: "postgres",
 	}
 
 	s.newDBConnection(ctx, dbConfig)
@@ -53,7 +61,7 @@ func main() {
 	// Add Backend API routes and utils
 	richTextEditor := &utils.DraftJS{}
 	
-	s.mux.GET(apiRoot+"/post/:slug", s.getPostByID())
+	s.mux.GET(apiRoot+"/post/:slug", s.getPostBySlug())
 	s.mux.POST(apiRoot+"/post/:slug", s.createPost(richTextEditor))
 	s.mux.PUT(apiRoot+"/post/:slug", s.updatePost(richTextEditor))
 	s.mux.DELETE(apiRoot+"/post/:slug", s.deletePost())
@@ -65,6 +73,8 @@ func main() {
 		port = defaultPort
 	}
 
-	// TODO - SERVE HTTPS
+	s.mux.GET(apiRoot+"/img/:img", serveDynamicImage())
+	s.log.Println("Serving")
+
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }

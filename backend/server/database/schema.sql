@@ -6,6 +6,7 @@ CREATE TABLE post(
   	slug 		varchar(255) UNIQUE,
   	img 		varchar(255),
     summary 	varchar(255),
+    category varchar(255),
     content 	text,
   	raw_content text
 );

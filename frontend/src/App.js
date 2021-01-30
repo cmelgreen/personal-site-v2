@@ -2,18 +2,48 @@ import React from "react";
 import { useState, useRef, forwardRef } from "react";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
-import Box from '@material-ui/core/Box'
+import { createMuiTheme, ThemeProvider} from '@material-ui/core/styles'
 
+import Box from '@material-ui/core/Box'
 import { useInView } from "react-hook-inview";
 import "./styles.css";
 
-//import Grow from '@material-ui/core/Grow';
-
-
 //content
-import { Splash } from "./Splash.js";
-import ContentList from "./ContentList.js";
-import { Header } from './Header.js'
+import { Splash } from "./Components/Splash.js";
+import ContentList from "./Components/ContentList.js";
+import { Header } from './Components/Header.js'
+
+const theme = createMuiTheme({
+  palette: {
+    type: 'light',
+    primary: {
+      main: '#FFF',
+    },
+    secondary: {
+      main: '#fe5b25',
+    },
+    textPrimary: {
+      main: '#000',
+    },
+    background: {
+      default: 'white'
+    }
+  },
+  typography: {
+    //fontFamily: 'Karla',
+    //fontFamily: 'Vollkorn',
+    //fontFamily: 'Lora',
+    fontFamily: 'Frank Ruhl Libre',
+    fontSmoothing: 'antialiased',
+    h6: {
+      fontStyle: 'italic',
+    },
+    button: {
+      fontWeight: 600,
+      color: 'secondary',
+    },
+  },
+});
 
 export default function App() {
   const scrollRef = useRef("scrollRef");
@@ -31,10 +61,12 @@ export default function App() {
   return (
     <div className="App" >
       <CssBaseline>
-        <Header className="top-bar" onClick={onClick} primary={inView} />
-        <Splash ref={inViewRef} />
-        <HeaderPadding height={64} ref={scrollRef} /> 
-        <ContentList category={category} />
+        <ThemeProvider theme={theme}>
+          <Header className="top-bar" onClick={onClick} primary={inView} />
+          <Splash ref={inViewRef} />
+          <HeaderPadding height={64} ref={scrollRef} /> 
+          <ContentList category={category} />
+        </ThemeProvider>
       </CssBaseline>
     </div>
   );

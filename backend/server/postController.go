@@ -18,7 +18,7 @@ type PostRequest struct {
 	Num 		int		`request:"numPosts"`
 	Raw			bool	`request:"raw"`
 	SortBy		string	`request:"sortBy"`
-	FilterBy	string	`request:"filterBy"`
+	Tag			string	`request:"tag"`
 }
 
 // RichTextHandler is interface for converting Rich Text Editor output to HTML
@@ -39,8 +39,8 @@ func unwrapBool(s string) bool {
 	return value
 }
 
-func (s *Server) getPostByID() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (s *Server) getPostBySlug() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		var request PostRequest 
 		err := utils.UnmarshalRequest(r, &request)
 		if err != nil {
@@ -48,13 +48,14 @@ func (s *Server) getPostByID() httprouter.Handle {
 			return
 		}
 
-		var post models.Post 
+		slug := params.ByName("slug")
 
+		var post *models.Post 
 
 		if request.Raw {
-			post, err = s.db.QueryPostRaw(r.Context(), request.Title)
+			post, err = s.db.GetPostBySlug(r.Context(), slug)
 		} else {
-			post, err = s.db.QueryPost(r.Context(), request.Title)
+			post, err = s.db.GetPostBySlug(r.Context(), slug)
 		}
 
 		if err != nil {
@@ -90,7 +91,7 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 		post.RawContent = post.Content
 		post.Content = html
 
-		err = s.db.InsertPost(r.Context(), post)
+		err = s.db.CreatePost(r.Context(), &post)
 		if err != nil {
 			s.log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,7 +124,7 @@ func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 		post.RawContent = post.Content
 		post.Content = html
 
-		err = s.db.UpdatePost(r.Context(), post)
+		err = s.db.UpdatePost(r.Context(), &post)
 		if err != nil {
 			s.log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -135,7 +136,7 @@ func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 }
 
 func (s *Server) deletePost()  httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		var request PostRequest 
 		err := utils.UnmarshalRequest(r, &request)
 		if err != nil {
@@ -143,7 +144,9 @@ func (s *Server) deletePost()  httprouter.Handle {
 			return
 		}
 
-		err = s.db.DeletePost(r.Context(), request.Title)
+		slug := params.ByName("slug")
+
+		err = s.db.DeletePost(r.Context(), slug)
 		if err != nil {
 			s.log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,8 +166,18 @@ func (s *Server) getPostSummaries() httprouter.Handle {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		
-		postSummaries, err := s.db.QueryPostSummaries(r.Context(), request.Num)
+
+		if request.Num == 0 {
+			request.Num = 10
+		}
+
+		var postSummaries *models.PostSummaryList
+		if request.Tag != "" {
+			postSummaries, err = s.db.GetPostSummariesByTag(r.Context(), request.Num, request.Tag)
+		} else {
+			postSummaries, err = s.db.GetPostSummaries(r.Context(), request.Num)
+
+		}
 		if err != nil {
 			s.log.Println(err)
 		}

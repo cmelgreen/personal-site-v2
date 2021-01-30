@@ -15,28 +15,28 @@ const ContentList = forwardRef((props, ref) => {
       "Next time you blow up your environment restore it in one command with Ansible",
     tags: ["ansible", "linux"],
     category: 'DevOps',
-    media: require('./ansible.png')
+    media: require('../media/ansible.png')
   },
   {
     title: 'Reproducible CI/CD Pipelines',
     summary: 'Use Pipelines and Jenkins-configuration-as-Code to skip the manual setup',
     tags: ['jenkins', 'ci/cd'],
     category: 'DevOps',
-    media: require('./jenkins.png')
+    media: require('../media/jenkins.png')
   },
   {
     title: 'React & Go I: A simple server',
     summary: 'Getting your feet wet using Go and React together',
     category: 'Backend',
     tags: ['go', 'react'],
-    media: require('./go-with-react.png')
+    media: require('../media/go-with-react.png')
   },
   {
     title: 'React & Go II: React Router and APIs',
     summary: 'Building complex interactions with React and Go',
     category: 'Backend',
     tags: ['go', 'react'],
-    media: require('./go-with-react.png')
+    media: require('../media/go-with-react.png')
   }];
 
   const useStyles = makeStyles((theme) => ({
