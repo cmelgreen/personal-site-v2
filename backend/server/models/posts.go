@@ -20,8 +20,9 @@ type PostList struct {
 type PostSummary struct {
 	Title		string	`json:"title" db:"title"`
 	Slug		string 	`json:"slug" db:"slug"`
-	Summary		string	`json:"summary" db:"summary"`
 	Thumbnail	string	`json:"thumbnail" db:"thumbnail"`
+	Summary		string	`json:"summary" db:"summary"`
+	Tags		Tags	`json:"tags"`
 }
 
 // PostSummaryList is a list of PostSummaries
