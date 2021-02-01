@@ -1,6 +1,8 @@
 import React from "react";
 import { useState, useRef, forwardRef } from "react";
 
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme, ThemeProvider} from '@material-ui/core/styles'
 
@@ -12,6 +14,7 @@ import "./styles.css";
 import { Splash } from "./Components/Splash.js";
 import ContentList from "./Components/ContentList.js";
 import { Header } from './Components/Header.js'
+import CMS from "./Components/CMS/CMS"
 
 const theme = createMuiTheme({
   palette: {
@@ -35,13 +38,10 @@ const theme = createMuiTheme({
     //fontFamily: 'Lora',
     fontFamily: 'Frank Ruhl Libre',
     fontSmoothing: 'antialiased',
-    h6: {
-      fontStyle: 'italic',
-    },
-    button: {
-      fontWeight: 600,
-      color: 'secondary',
-    },
+    // button: {
+    //   fontWeight: 600,
+    //   color: 'secondary',
+    // },
   },
 });
 
@@ -59,13 +59,23 @@ export default function App() {
 
   // Use react transitions
   return (
-    <div className="App" >
+    <div className="App">
       <CssBaseline>
         <ThemeProvider theme={theme}>
-          <Header className="top-bar" onClick={onClick} primary={inView} />
-          <Splash ref={inViewRef} />
-          <HeaderPadding height={64} ref={scrollRef} /> 
-          <ContentList category={category} />
+          <Router>
+          <Route path='/cms' exact={true}>
+              <CMS />
+            </Route>
+            <Route path='/cms/:slug'>
+              <CMS />
+            </Route>
+            <Route path="/" exact={true}>
+              <Header className="top-bar" onClick={onClick} primary={inView} />
+              <Splash ref={inViewRef} />
+              <HeaderPadding height={64} ref={scrollRef} /> 
+              <ContentList category={category} />
+            </Route>
+          </Router>
         </ThemeProvider>
       </CssBaseline>
     </div>
@@ -75,3 +85,4 @@ export default function App() {
 const HeaderPadding = forwardRef((props, ref) => {
   return <Box {...props} ref={ref} />
 })
+

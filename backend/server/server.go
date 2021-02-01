@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
 	"PersonalSite/backend/database"
 
+	"github.com/rs/cors"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -37,6 +39,15 @@ func newServer(ctx context.Context) *Server {
 	}
 
 	return &s
+}
+
+func (s *Server) serve(port string) {
+	s.log.Fatal(http.ListenAndServe(port, s.mux))
+}
+
+func (s *Server) serveCORSEnabled(port string) {
+	muxCORS := cors.AllowAll().Handler(s.mux)
+	s.log.Fatal(http.ListenAndServe(port, muxCORS))
 }
 
 // NewDBConnection creates a new connection to a database for a server

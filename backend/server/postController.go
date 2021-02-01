@@ -6,23 +6,22 @@ import (
 	"strconv"
 
 	"PersonalSite/backend/models"
-	"PersonalSite/backend/utils"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-//go:generate go run utils/requestBinding/bindingGenerator.go -f postController.go -out APIBindings.go
+//go:generate go run requestBinding/bindingGenerator.go -f postController.go -out APIBindings.go
 
 // PostRequest represents the request for a post
 type PostRequest struct {
-	Num 		int		`request:"numPosts"`
-	Raw			bool	`request:"raw"`
-	SortBy		string	`request:"sortBy"`
-	Tag			string	`request:"tag"`
+	Num    int    `request:"numPosts"`
+	Raw    bool   `request:"raw"`
+	SortBy string `request:"sortBy"`
+	Tag    string `request:"tag"`
 }
 
 // RichTextHandler is interface for converting Rich Text Editor output to HTML
-type RichTextHandler interface{
+type RichTextHandler interface {
 	RichTextToHTML(string) (string, error)
 }
 
@@ -42,25 +41,27 @@ func unwrapBool(s string) bool {
 
 func (s *Server) getPostBySlug() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		var request PostRequest 
-		err := utils.UnmarshalRequest(r, &request)
+		var request PostRequest
+		err := UnmarshalRequest(r, &request)
 		if err != nil {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		slug := params.ByName("slug")
 
-		var post *models.Post 
+		var post *models.Post
 
 		if request.Raw {
-			post, err = s.db.GetPostBySlug(r.Context(), slug)
+			post, err = s.db.GetPostBySlugRaw(r.Context(), slug)
 		} else {
 			post, err = s.db.GetPostBySlug(r.Context(), slug)
 		}
 
 		if err != nil {
 			s.log.Println(err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 			// IMPLEMENT ERROR HANDLING
@@ -74,9 +75,12 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		var post models.Post
 
+		s.log.Println("new post!")
+
 		err := json.NewDecoder(r.Body).Decode(&post)
 		if err != nil {
 			s.log.Println(err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 			// ADD ERROR HANDLING
@@ -105,6 +109,7 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 
 func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		s.log.Println("updating!")
 		var post models.Post
 
 		err := json.NewDecoder(r.Body).Decode(&post)
@@ -136,10 +141,10 @@ func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 	}
 }
 
-func (s *Server) deletePost()  httprouter.Handle {
+func (s *Server) deletePost() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		var request PostRequest 
-		err := utils.UnmarshalRequest(r, &request)
+		var request PostRequest
+		err := UnmarshalRequest(r, &request)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -162,7 +167,7 @@ func (s *Server) deletePost()  httprouter.Handle {
 func (s *Server) getPostSummaries() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		var request PostRequest
-		err := utils.UnmarshalRequest(r, &request)
+		err := UnmarshalRequest(r, &request)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return

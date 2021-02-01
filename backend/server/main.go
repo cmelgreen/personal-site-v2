@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"net/http"
 	"os"
 	"time"
 
 	"PersonalSite/backend/database"
-	"PersonalSite/backend/utils"
+
+	
 )
 
 // PULL INTO YAML FILE
@@ -59,11 +59,11 @@ func main() {
 	s.newDBConnection(ctx, dbConfig)
 
 	// Add Backend API routes and utils
-	richTextEditor := &utils.DraftJS{}
+	richTextEditor := &DraftJS{}
 	
 	s.mux.GET(apiRoot+"/post/:slug", s.getPostBySlug())
-	s.mux.POST(apiRoot+"/post/:slug", s.createPost(richTextEditor))
-	s.mux.PUT(apiRoot+"/post/:slug", s.updatePost(richTextEditor))
+	s.mux.POST(apiRoot+"/post", s.createPost(richTextEditor))
+	s.mux.PUT(apiRoot+"/post", s.updatePost(richTextEditor))
 	s.mux.DELETE(apiRoot+"/post/:slug", s.deletePost())
 	s.mux.GET(apiRoot+"/post-summaries", s.getPostSummaries())
 
@@ -78,5 +78,5 @@ func main() {
 
 	//createDummyPost(ctx, s)
 
-	s.log.Fatal(http.ListenAndServe(port, s.mux))
+	s.serveCORSEnabled(port)
 }

@@ -125,7 +125,7 @@ const Tags = (props) => {
   if (props.tags) {
     return (
       <div className="tags">
-        {props.tags.value.map((tag, i) => (
+        {props.tags.map((tag, i) => (
           <Button key={i}>{tag}</Button>
         ))}
       </div>

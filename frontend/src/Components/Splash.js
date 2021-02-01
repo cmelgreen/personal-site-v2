@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
     transitionDelay: '.3s',
   },
   mediaWrapper: {
-    height: '58vw',
+    height: '57vw',
     width: '100vw'
   },
   text: {

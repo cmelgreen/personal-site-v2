@@ -35,11 +35,11 @@ func createDummyPost(ctx context.Context, s *Server) {
 		},
 	}
 
-	testTags := []models.Tags{
-		{Values: []string{"ansible", "linux"}},
-		{Values: []string{"jenkins", "ci/cd"}},
-		{Values: []string{"go", "react"}},
-		{Values: []string{"go", "react"}},
+	testTags := []*[]string{
+		{"ansible", "linux"},
+		{"jenkins", "ci/cd"},
+		{"go", "react"},
+		{"go", "react"},
 	}
 
 	for i := range testPosts {

@@ -14,14 +14,14 @@ func (db *Database) CreatePost(ctx context.Context, post *models.Post) error {
 		VALUES (:title, :slug, :img, :summary, :category, :content, :raw_content);`,
 
 		`INSERT INTO tag(value)
-		VALUES (UNNEST(:tags.value ::::text[]))
+		VALUES (UNNEST(:tags ::::text[]))
 		ON CONFLICT DO NOTHING;`,
 
 		`INSERT INTO post_TAG
 		SELECT    p.id, t.id
 		FROM      post p
 		LEFT JOIN tag t
-		ON        t.value = ANY(:tags.value ::::text[])
+		ON        t.value = ANY(:tags ::::text[])
 		WHERE	  p.slug = :slug;`,
 	}
 
@@ -43,8 +43,19 @@ func (db *Database) GetPostBySlug(ctx context.Context, slug string) (*models.Pos
 	query := "SELECT title, slug, img, summary, category, content FROM post WHERE slug=$1;"
 	err := db.GetContext(ctx, &post, query, slug)
 
-	
-	post.Tags = *db.GetTagsBySlug(ctx, slug)
+	post.Tags = db.GetTagsBySlug(ctx, slug)
+
+	return &post, err
+}
+
+// GetPostBySlugRaw gets
+func (db *Database) GetPostBySlugRaw(ctx context.Context, slug string) (*models.Post, error) {
+	var post models.Post
+
+	query := "SELECT title, slug, img, summary, category, raw_content as content FROM post WHERE slug=$1;"
+	err := db.GetContext(ctx, &post, query, slug)
+
+	post.Tags = db.GetTagsBySlug(ctx, slug)
 
 	return &post, err
 }
@@ -56,11 +67,11 @@ func (db *Database) GetPostRawBySlug(ctx context.Context, slug string) (*models.
 	query := "SELECT id, title, summary, category, content_raw as content FROM post WHERE slug=$1;"
 	err := db.GetContext(ctx, &post, query, slug)
 
-	var tags models.Tags
+	var tags []string
 	query = "SELECT value FROM post_to_tag WHERE slug=$1;"
 	err = db.GetContext(ctx, &tags, query, slug)
 
-	post.Tags = tags
+	post.Tags = &tags
 
 	return &post, err
 }
@@ -79,15 +90,15 @@ func (db *Database) UpdatePost(ctx context.Context, post *models.Post) error {
 		);`,
 
 		`INSERT INTO tag(value)
-		VALUES (UNNEST(:tags.value ::::text[]))
+		VALUES (UNNEST(:tags ::::text[]))
 		ON CONFLICT DO NOTHING;`,
 
 		`INSERT INTO post_tag
 		SELECT    p.id, t.id
 		FROM      post p
 		LEFT JOIN tag t
-		ON        t.value = ANY(:tags.value ::::text[])
-		WHERE	  p.slug = 'aaa';`,
+		ON        t.value = ANY(:tags ::::text[])
+		WHERE	  p.slug = :slug;`,
 	}
 
 	return db.TransactionCtx(ctx, queries, post)
@@ -101,7 +112,7 @@ func (db *Database) GetPostSummaries(ctx context.Context, limit int) (*models.Po
 	err := db.SelectContext(ctx, &posts, query, limit)
 
 	for _, post := range posts {
-		post.Tags = *db.GetTagsBySlug(ctx, post.Slug)
+		post.Tags = db.GetTagsBySlug(ctx, post.Slug)
 	}
 
 	return &models.PostSummaryList{Posts: posts}, err
@@ -122,34 +133,34 @@ func (db *Database) GetPostSummariesByTag(ctx context.Context, limit int, tag st
 	err := db.SelectContext(ctx, &posts, query, limit, tag)
 
 	for _, post := range posts {
-		post.Tags = *db.GetTagsBySlug(ctx, post.Slug)
+		post.Tags = db.GetTagsBySlug(ctx, post.Slug)
 	}
 
 	return &models.PostSummaryList{Posts: posts}, err
 }
 
 // GetTagsBySlug gets
-func (db *Database) GetTagsBySlug(ctx context.Context, slug string) *models.Tags {
+func (db *Database) GetTagsBySlug(ctx context.Context, slug string) *[]string {
 	var tags []string
 
 	query := "SELECT value FROM post_to_tag WHERE slug=$1;"
 	rows, err := db.QueryxContext(ctx, query, slug)
 	if err != nil {
 		fmt.Println(err)
-		return &models.Tags{}
+		return &tags
 	}
-	
+
 	for rows.Next() {
 		var s string
 		err = rows.Scan(&s)
 		if err != nil {
 			fmt.Println(err)
-			return &models.Tags{}
+			return &tags
 		}
 		tags = append(tags, s)
 	}
 
-	return &models.Tags{Values: tags}
+	return &tags
 }
 
 // TransactionCtx takes a context, slice of queries, and argument. Commits and returns nil if all queries

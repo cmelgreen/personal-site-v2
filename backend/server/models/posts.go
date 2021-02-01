@@ -10,7 +10,7 @@ type Post struct {
 	Category	string 	`json:"category" db:"category"`
 	Content 	string 	`json:"content" db:"content"`
 	RawContent  string	`db:"raw_content"`
-	Tags 		Tags	`json:"tags"`
+	Tags 		*[]string	`json:"tags"`
 }
 
 // PostList is a list of Posts
@@ -25,7 +25,7 @@ type PostSummary struct {
 	Img			string	`json:"img" db:"img"`
 	Summary		string	`json:"summary" db:"summary"`
 	Category	string 	`json:"category" db:"category"`
-	Tags		Tags	`json:"tags"`
+	Tags		*[]string `json:"tags"`
 }
 
 // PostSummaryList is a list of PostSummaries
