@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"PersonalSite/backend/database"
+	"PersonalSite/backend/postservice"
 
 	
 )
@@ -59,13 +60,15 @@ func main() {
 	s.newDBConnection(ctx, dbConfig)
 
 	// Add Backend API routes and utils
-	richTextEditor := &DraftJS{}
+	richTextParser := &DraftJS{}
+
+	postService := postservice.NewPostService(s.db, richTextParser)
 	
-	s.mux.GET(apiRoot+"/post/:slug", s.getPostBySlug())
-	s.mux.POST(apiRoot+"/post", s.createPost(richTextEditor))
-	s.mux.PUT(apiRoot+"/post", s.updatePost(richTextEditor))
-	s.mux.DELETE(apiRoot+"/post/:slug", s.deletePost())
-	s.mux.GET(apiRoot+"/post-summaries", s.getPostSummaries())
+	s.mux.GET(apiRoot+"/post/:slug", postService.GetPostHTTP())
+	s.mux.POST(apiRoot+"/post", postService.CreatePostHTTP())
+	s.mux.PUT(apiRoot+"/post", postService.UpdatePostHTTP())
+	s.mux.DELETE(apiRoot+"/post/:slug", postService.DeletePostHTTP())
+	s.mux.GET(apiRoot+"/post-summaries", postService.GetPostSummariesHTTP())
 
 	// Get port and serve
 	port := os.Getenv(portEnvVar)

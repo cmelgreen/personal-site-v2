@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"PersonalSite/backend/models"
+	"PersonalSite/backend/postservice"
 )
 
 // CreatePost creates
-func (db *Database) CreatePost(ctx context.Context, post *models.Post) error {
+func (db *Database) CreatePost(ctx context.Context, post *postservice.Post) error {
 	queries := []string{
 		`INSERT INTO post(title, slug, img, summary, category, content, raw_content) 
 		VALUES (:title, :slug, :img, :summary, :category, :content, :raw_content);`,
@@ -37,10 +37,10 @@ func (db *Database) DeletePost(ctx context.Context, slug string) error {
 }
 
 // GetPostBySlug gets
-func (db *Database) GetPostBySlug(ctx context.Context, slug string) (*models.Post, error) {
-	var post models.Post
+func (db *Database) GetPostBySlug(ctx context.Context, slug string) (*postservice.Post, error) {
+	var post postservice.Post
 
-	query := "SELECT title, slug, img, summary, category, content FROM post WHERE slug=$1;"
+	query := "SELECT title, slug, img, summary, category, content, raw_content FROM post WHERE slug=$1;"
 	err := db.GetContext(ctx, &post, query, slug)
 
 	post.Tags = db.GetTagsBySlug(ctx, slug)
@@ -49,7 +49,7 @@ func (db *Database) GetPostBySlug(ctx context.Context, slug string) (*models.Pos
 }
 
 // UpdatePost updates
-func (db *Database) UpdatePost(ctx context.Context, post *models.Post) error {
+func (db *Database) UpdatePost(ctx context.Context, post *postservice.Post) error {
 	queries := []string{
 		`UPDATE post SET (title, slug, img, summary, category, content, raw_content) =
 			(:title, :slug, :img, :summary, :category, :content, :raw_content)
@@ -77,8 +77,8 @@ func (db *Database) UpdatePost(ctx context.Context, post *models.Post) error {
 }
 
 // GetPostSummaries gets
-func (db *Database) GetPostSummaries(ctx context.Context, limit int) (*models.PostSummaryList, error) {
-	var posts []*models.PostSummary
+func (db *Database) GetPostSummaries(ctx context.Context, limit int) (*postservice.PostSummaryList, error) {
+	var posts []*postservice.PostSummary
 
 	query := `SELECT title, slug, img, summary, category FROM post LIMIT $1;`
 	err := db.SelectContext(ctx, &posts, query, limit)
@@ -87,12 +87,12 @@ func (db *Database) GetPostSummaries(ctx context.Context, limit int) (*models.Po
 		post.Tags = db.GetTagsBySlug(ctx, post.Slug)
 	}
 
-	return &models.PostSummaryList{Posts: posts}, err
+	return &postservice.PostSummaryList{Posts: posts}, err
 }
 
 // GetPostSummariesByTag gets
-func (db *Database) GetPostSummariesByTag(ctx context.Context, limit int, tag string) (*models.PostSummaryList, error) {
-	var posts []*models.PostSummary
+func (db *Database) GetPostSummariesByTag(ctx context.Context, limit int, tag string) (*postservice.PostSummaryList, error) {
+	var posts []*postservice.PostSummary
 
 	query := `
 	SELECT  title, slug, img, summary, category FROM post
@@ -108,7 +108,7 @@ func (db *Database) GetPostSummariesByTag(ctx context.Context, limit int, tag st
 		post.Tags = db.GetTagsBySlug(ctx, post.Slug)
 	}
 
-	return &models.PostSummaryList{Posts: posts}, err
+	return &postservice.PostSummaryList{Posts: posts}, err
 }
 
 // GetTagsBySlug gets

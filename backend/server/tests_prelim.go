@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 
-	"PersonalSite/backend/models"
+	"PersonalSite/backend/postservice"
 )
 
 func createDummyPost(ctx context.Context, s *Server) {
-	testPosts := []models.Post{
+	testPosts := []postservice.Post{
 		{
 			Title: "Automating Dev Environment Setup",
 			Slug: "dev-env-setup",

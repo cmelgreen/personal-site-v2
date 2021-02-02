@@ -12,7 +12,6 @@ import (
 
 )
 
-
 // bindTemplate is the top-level struct passed to template.Execute()
 type bindTemplate struct {
 	Package string

@@ -7,35 +7,22 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func parseRequest(r *http.Request, params httprouter.Params) (*PostRequest, error) {
-	var request *PostRequest
+//go:generate go run requestBinding/bindingGenerator.go -f postService.go -out APIBindings.go
 
-	err := UnmarshalRequest(r, request)
+func parseRequest(r *http.Request, params httprouter.Params) (*PostRequest, error) {
+	var request PostRequest
+
+	err := UnmarshalRequest(r, &request)
 	if err != nil {
 		return nil, err
 	}
 	request.Slug = params.ByName("slug")
 
-	return request, nil
+	return &request, nil
 }
 
-func (p *PostService) getPostHTTP() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		request, err := parseRequest(r, params)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-
-		item, err := p.getPostBySlug(r.Context(), request)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		}
-
-		json.NewEncoder(w).Encode(item)
-	}
-}
-
-func (p *PostService) createPostHTTP() httprouter.Handle {
+// CreatePostHTTP serves
+func (p *PostService) CreatePostHTTP() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		err := p.createPost(r.Context(), r.Body)
 		if err != nil {
@@ -46,7 +33,8 @@ func (p *PostService) createPostHTTP() httprouter.Handle {
 	}
 }
 
-func (p *PostService) updatePostHTTP() httprouter.Handle {
+// UpdatePostHTTP serves
+func (p *PostService) UpdatePostHTTP() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		err := p.updatePost(r.Context(), r.Body)
 		if err != nil {
@@ -57,7 +45,8 @@ func (p *PostService) updatePostHTTP() httprouter.Handle {
 	}
 }
 
-func (p *PostService) deletePostHTTP() httprouter.Handle {
+// DeletePostHTTP serves
+func (p *PostService) DeletePostHTTP() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		request, err := parseRequest(r, params)
 		if err != nil {
@@ -73,7 +62,25 @@ func (p *PostService) deletePostHTTP() httprouter.Handle {
 	}
 }
 
-func (p *PostService) getPostSummariesHTTP() httprouter.Handle {
+// GetPostHTTP serves
+func (p *PostService) GetPostHTTP() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		request, err := parseRequest(r, params)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+
+		item, err := p.getPostBySlug(r.Context(), request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		}
+
+		json.NewEncoder(w).Encode(item)
+	}
+}
+
+// GetPostSummariesHTTP serves
+func (p *PostService) GetPostSummariesHTTP() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		request, err := parseRequest(r, params)
 		if err != nil {

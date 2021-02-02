@@ -4,29 +4,18 @@ import (
 	"io"
 	"encoding/json"
 	"context"
+	"log"
 )
 
-// PostService for posts
-type PostService struct {
-	store PostStore
-	rtParser RichTextParser
-}
 
-// PostRequest represents the request for a post
-type PostRequest struct {
-	Slug   string 
-	Num    int    `request:"numPosts"`
-	Raw    bool   `request:"raw"`
-	SortBy string `request:"sortBy"`
-	Tag    string `request:"tag"`
-}
 
-// RichTextParser is interface for converting Rich Text Editor output to HTML
-type RichTextParser interface {
-	RichTextToHTML(string) (string, error)
+// NewPostService is the entry point
+func NewPostService(store PostStore, rtParser RichTextParser) *PostService {
+	return &PostService{
+		store: store,
+		rtParser: rtParser,
+	}
 }
-
-type postUser = func(context.Context, *Post) error
 
 func (p *PostService) getPostBySlug(ctx context.Context, r *PostRequest) (*Post, error) {
 	post, err := p.store.GetPostBySlug(ctx, r.Slug)
@@ -34,10 +23,16 @@ func (p *PostService) getPostBySlug(ctx context.Context, r *PostRequest) (*Post,
 		return nil, err
 	}
 
+	log.Println("Post: ", post)
+
 	if r.Raw {
+		log.Println("Raw: ", post.RawContent)
+		log.Println("Con: ", post.Content)
 		post.Content = post.RawContent
 		post.RawContent = ""
 	}
+
+	log.Println(post)
 
 	return post, nil
 }
@@ -60,7 +55,7 @@ func (p *PostService) unmarshalPostAndUse(ctx context.Context, r io.Reader, f po
 
 	html, err := p.rtParser.RichTextToHTML(post.Content)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	post.RawContent = post.Content
