@@ -1,9 +1,10 @@
 import React from 'react'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { TextField } from '@material-ui/core'
 import MUIRichTextEditor from 'mui-rte';
 import { useParams, useHistory } from 'react-router-dom'
+import { convertToRaw } from 'draft-js'
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -18,30 +19,47 @@ import ClearIcon from '@material-ui/icons/Clear';
 import axios from 'axios'
 
 export default function Editor(props) {
+  const newPost = {title: '', slug: '', content: '', tags: []}
   const history = useHistory()
 
   const classes = useStyles() 
 
   const slug = useParams().slug
-  const [post, setPost] = useState({})
+  const [post, setPost] = useState(newPost)
+
+  const firstLoad = useRef(false)
 
   useEffect(() => {
-    if (slug) {
+    if ( slug ) {
       axios.get(apiPost + slug, {params: {raw: true}})
-        .then(resp => setPost(resp.data))
-        .catch(resp => setPost({}))
+        .then(resp => {setPost(resp.data)})
+        .catch(resp => {setPost(newPost)})
     }
+
   }, [slug])
+
+  const save = useRef(false)
+
+  useEffect(() => {
+    if ( save.current ) {
+      if ( slug ) {
+        updatePost(post)
+      } else {
+        createPost(post)
+          .then(() => history.push('/cms/' + post.slug))
+          .catch(e => console.log(e))
+      }
+
+      save.current = false
+    }
+  }, [save.current, post])
+
 
   const postFields = ['title', 'slug', 'summary']
 
-  console.log('Post:', post)
-  
-  const onSave = (content) => {
-    setPost({...post, content: content})
-    slug ? updatePost(post) : createPost(post)
-    console.log(post)
-    history.push("/cms/" + post.slug) 
+  const onSave = (richText) => {
+    setPost({...post, content: richText})
+    save.current = true
   }
 
   // const post = usePostByID(useParams().postID, true)
@@ -70,12 +88,12 @@ export default function Editor(props) {
   return (
     <Grid container className={classes.fullscreen} direction="column" spacing={2}>
       {postFields.map((field, i) => (
-        <Grid item>
+        <Grid item key={i}>
           <TextField
             id={field}
             label={field}
             InputLabelProps={{ shrink: true }} 
-            value={post[field]}
+            value={post[field] ? post[field] : ""}
             onChange={e => setPost({...post, [field]: e.target.value})}
             variant="outlined"
             fullWidth={true}
@@ -106,7 +124,12 @@ export default function Editor(props) {
       </Grid>
       <Grid item>
         <MUIRichTextEditor 
-        defaultValue={post.content} 
+        defaultValue={post.content}
+        //   () => {
+        //   console.log('Content', post.content)
+        //   return post.content ? post.content : ''
+        // }}
+        //onChange={handleChange}
         onSave={onSave} 
         controls={["title", "bold", "italic", "underline", "strikethrough", "highlight", "undo", "redo", "link", "media", "numberList", "bulletList", "quote", "code", "clear", "save", "deletePost"]}
         customControls={[
@@ -134,16 +157,19 @@ const useStyles = makeStyles((theme) => ({
 
 const apiPost = 'http://localhost:8080/api/post/'
 
+const api = axios.create({
+  baseURL: apiPost,
+  validateStatus: (status) => {
+       return status == 200;
+   },
+});
+
 export const createPost = post => {
-  axios.post(apiPost, post)
-    .then(resp => console.log('Created', resp))
-    .catch(resp => console.log('Error creating post', resp))
+  return api.post(apiPost, post)
 }
 
 export const updatePost = post => {
-  axios.put(apiPost, post)
-    .then(resp => console.log('Updated', resp))
-    .catch(resp => console.log('Error updating post', resp))
+  return api.put(apiPost, post)
 }
 
 export const usePostBySlug = (slug, raw=false) => {
@@ -151,19 +177,15 @@ export const usePostBySlug = (slug, raw=false) => {
 
   useEffect(() => {
     if (slug) {
-      axios.get(apiPost + slug, {params: {raw}})
+      api.get(apiPost + slug, {params: {raw}})
         .then(resp => setPost(resp.data))
         .catch(resp => setPost({}))
     }
   }, [slug])
 
-  console.log('Postbyslug:',  post)
-
   return [post, setPost]
 }
 
 export const deletePost = (post) => {
-  axios.delete(apiPost + post.slug)
-    .then(resp => console.log('Deleted'))
-    .catch(resp => console.log('Error deleting post', resp))
+  return api.delete(apiPost + post.slug)
 }

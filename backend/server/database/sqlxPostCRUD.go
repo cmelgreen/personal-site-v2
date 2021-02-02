@@ -48,34 +48,6 @@ func (db *Database) GetPostBySlug(ctx context.Context, slug string) (*models.Pos
 	return &post, err
 }
 
-// GetPostBySlugRaw gets
-func (db *Database) GetPostBySlugRaw(ctx context.Context, slug string) (*models.Post, error) {
-	var post models.Post
-
-	query := "SELECT title, slug, img, summary, category, raw_content as content FROM post WHERE slug=$1;"
-	err := db.GetContext(ctx, &post, query, slug)
-
-	post.Tags = db.GetTagsBySlug(ctx, slug)
-
-	return &post, err
-}
-
-// GetPostRawBySlug gets
-func (db *Database) GetPostRawBySlug(ctx context.Context, slug string) (*models.Post, error) {
-	var post models.Post
-
-	query := "SELECT id, title, summary, category, content_raw as content FROM post WHERE slug=$1;"
-	err := db.GetContext(ctx, &post, query, slug)
-
-	var tags []string
-	query = "SELECT value FROM post_to_tag WHERE slug=$1;"
-	err = db.GetContext(ctx, &tags, query, slug)
-
-	post.Tags = &tags
-
-	return &post, err
-}
-
 // UpdatePost updates
 func (db *Database) UpdatePost(ctx context.Context, post *models.Post) error {
 	queries := []string{
@@ -140,14 +112,14 @@ func (db *Database) GetPostSummariesByTag(ctx context.Context, limit int, tag st
 }
 
 // GetTagsBySlug gets
-func (db *Database) GetTagsBySlug(ctx context.Context, slug string) *[]string {
+func (db *Database) GetTagsBySlug(ctx context.Context, slug string) []string {
 	var tags []string
 
 	query := "SELECT value FROM post_to_tag WHERE slug=$1;"
 	rows, err := db.QueryxContext(ctx, query, slug)
 	if err != nil {
 		fmt.Println(err)
-		return &tags
+		return tags
 	}
 
 	for rows.Next() {
@@ -155,12 +127,12 @@ func (db *Database) GetTagsBySlug(ctx context.Context, slug string) *[]string {
 		err = rows.Scan(&s)
 		if err != nil {
 			fmt.Println(err)
-			return &tags
+			return tags
 		}
 		tags = append(tags, s)
 	}
 
-	return &tags
+	return tags
 }
 
 // TransactionCtx takes a context, slice of queries, and argument. Commits and returns nil if all queries

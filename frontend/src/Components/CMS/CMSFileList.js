@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from "react-router-dom";
 
 import axios from 'axios'
@@ -50,10 +50,10 @@ export const usePostSummaries = (numPosts=10) => {
   useEffect(() => {
     axios.get(apiPostSummaries, {params: {numPosts}})
       .then(resp => {
-        console.log(resp)
-        if ( resp.data.posts ) setPosts(resp.data.posts)})
+        if ( resp.data.posts ) setPosts(resp.data.posts)
+      })
       .catch(() => setPosts([]))
-  }, [])
+    }, [])
 
   return posts
 }

@@ -35,7 +35,7 @@ func createDummyPost(ctx context.Context, s *Server) {
 		},
 	}
 
-	testTags := []*[]string{
+	testTags := [][]string{
 		{"ansible", "linux"},
 		{"jenkins", "ci/cd"},
 		{"go", "react"},

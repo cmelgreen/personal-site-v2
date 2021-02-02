@@ -31,19 +31,12 @@ func writeJSON(w http.ResponseWriter, message interface{}) {
 	json.NewEncoder(w).Encode(message)
 }
 
-func unwrapBool(s string) bool {
-	value, err := strconv.ParseBool(s)
-	if err != nil {
-		return false
-	}
-	return value
-}
-
 func (s *Server) getPostBySlug() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		var request PostRequest
 		err := UnmarshalRequest(r, &request)
 		if err != nil {
+			s.log.Println(err)
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -67,6 +60,7 @@ func (s *Server) getPostBySlug() httprouter.Handle {
 			// IMPLEMENT ERROR HANDLING
 		}
 
+		s.log.Println(post)
 		writeJSON(w, post)
 	}
 }
@@ -79,7 +73,7 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 
 		err := json.NewDecoder(r.Body).Decode(&post)
 		if err != nil {
-			s.log.Println(err)
+			s.log.Println("Decoding err: ", err)
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -88,7 +82,7 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 
 		html, err := richText.RichTextToHTML(post.Content)
 		if err != nil {
-			s.log.Println(err)
+			s.log.Println("Rich text err: ", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -103,6 +97,7 @@ func (s *Server) createPost(richText RichTextHandler) httprouter.Handle {
 			return
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -114,15 +109,21 @@ func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 
 		err := json.NewDecoder(r.Body).Decode(&post)
 		if err != nil {
-			s.log.Println(err)
+			s.log.Println("Decoding err: ", err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 			// ADD ERROR HANDLING
 		}
 
+		s.log.Println(post)
+
 		html, err := richText.RichTextToHTML(post.Content)
+		s.log.Println(post.Content)
+		s.log.Println(html)
 		if err != nil {
-			s.log.Println(err)
+			s.log.Println("RTE err: ", err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -133,10 +134,12 @@ func (s *Server) updatePost(richText RichTextHandler) httprouter.Handle {
 		err = s.db.UpdatePost(r.Context(), &post)
 		if err != nil {
 			s.log.Println(err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -146,6 +149,8 @@ func (s *Server) deletePost() httprouter.Handle {
 		var request PostRequest
 		err := UnmarshalRequest(r, &request)
 		if err != nil {
+			s.log.Println(err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -160,6 +165,7 @@ func (s *Server) deletePost() httprouter.Handle {
 			// IMPLEMENT ERROR HANDLING
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -169,6 +175,8 @@ func (s *Server) getPostSummaries() httprouter.Handle {
 		var request PostRequest
 		err := UnmarshalRequest(r, &request)
 		if err != nil {
+			s.log.Println(err)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -188,6 +196,8 @@ func (s *Server) getPostSummaries() httprouter.Handle {
 			s.log.Println(err)
 		}
 
+		
+		json.NewEncoder(s.log.Writer()).Encode(postSummaries)
 		writeJSON(w, postSummaries)
 	}
 }

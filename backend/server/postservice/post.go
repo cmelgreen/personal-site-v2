@@ -1,4 +1,4 @@
-package models
+package postservice
 
 // Post is the main structure served and displayed
 type Post struct {
@@ -31,4 +31,3 @@ type PostSummary struct {
 type PostSummaryList struct {
 	Posts 		[]*PostSummary `json:"posts"`
 }
-
