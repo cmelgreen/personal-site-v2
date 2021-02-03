@@ -4,10 +4,7 @@ import (
 	"io"
 	"encoding/json"
 	"context"
-	"log"
 )
-
-
 
 // NewPostService is the entry point
 func NewPostService(store PostStore, rtParser RichTextParser) *PostService {
@@ -23,16 +20,10 @@ func (p *PostService) getPostBySlug(ctx context.Context, r *PostRequest) (*Post,
 		return nil, err
 	}
 
-	log.Println("Post: ", post)
-
 	if r.Raw {
-		log.Println("Raw: ", post.RawContent)
-		log.Println("Con: ", post.Content)
 		post.Content = post.RawContent
 		post.RawContent = ""
 	}
-
-	log.Println(post)
 
 	return post, nil
 }

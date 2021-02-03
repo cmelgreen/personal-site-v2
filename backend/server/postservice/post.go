@@ -22,7 +22,7 @@ type PostStore interface {
 
 // PostRequest represents the request for a post
 type PostRequest struct {
-	Slug   string 
+	Slug   string `request:"slug"`
 	Num    int    `request:"numPosts"`
 	Raw    bool   `request:"raw"`
 	SortBy string `request:"sortBy"`

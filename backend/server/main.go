@@ -8,7 +8,7 @@ import (
 	"PersonalSite/backend/database"
 	"PersonalSite/backend/postservice"
 
-	
+	"github.com/go-chi/chi/middleware"
 )
 
 // PULL INTO YAML FILE
@@ -63,12 +63,14 @@ func main() {
 	richTextParser := &DraftJS{}
 
 	postService := postservice.NewPostService(s.db, richTextParser)
+
+	s.mux.Use(middleware.URLFormat)
 	
-	s.mux.GET(apiRoot+"/post/:slug", postService.GetPostHTTP())
-	s.mux.POST(apiRoot+"/post", postService.CreatePostHTTP())
-	s.mux.PUT(apiRoot+"/post", postService.UpdatePostHTTP())
-	s.mux.DELETE(apiRoot+"/post/:slug", postService.DeletePostHTTP())
-	s.mux.GET(apiRoot+"/post-summaries", postService.GetPostSummariesHTTP())
+	s.mux.Get(apiRoot+"/post/{slug}", postService.GetPostHTTP())
+	s.mux.Post(apiRoot+"/post", postService.CreatePostHTTP())
+	s.mux.Put(apiRoot+"/post", postService.UpdatePostHTTP())
+	s.mux.Delete(apiRoot+"/post/{slug}", postService.DeletePostHTTP())
+	s.mux.Get(apiRoot+"/post-summaries", postService.GetPostSummariesHTTP())
 
 	// Get port and serve
 	port := os.Getenv(portEnvVar)
@@ -76,7 +78,7 @@ func main() {
 		port = defaultPort
 	}
 
-	s.mux.GET(apiRoot+"/img/:img", serveDynamicImage())
+	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.log.Println("Serving")
 
 	//createDummyPost(ctx, s)

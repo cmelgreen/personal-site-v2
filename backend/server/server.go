@@ -10,7 +10,7 @@ import (
 	"PersonalSite/backend/database"
 
 	"github.com/rs/cors"
-	"github.com/julienschmidt/httprouter"
+	"github.com/go-chi/chi"
 )
 
 const (
@@ -26,7 +26,8 @@ var (
 // Server struct for storing database, mux, and logger
 type Server struct {
 	db  *database.Database
-	mux *httprouter.Router
+	mux chi.Router
+	middleware chi.Middlewares
 	log *log.Logger
 }
 
@@ -34,7 +35,7 @@ type Server struct {
 func newServer(ctx context.Context) *Server {
 	s := Server{
 		log: log.New(logOut, logPrefix, logFlags),
-		mux: httprouter.New(),
+		mux: chi.NewRouter(),
 		db:  &database.Database{},
 	}
 

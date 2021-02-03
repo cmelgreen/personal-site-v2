@@ -12,6 +12,7 @@ func (p *PostRequest) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap {
 		&p.Num: "numPosts",
 		&p.Raw: "raw",
+		&p.Slug: "slug",
 		&p.SortBy: "sortBy",
 		&p.Tag: "tag",
 	}

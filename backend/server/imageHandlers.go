@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-	//"path"
+	"path"
 	"strings"
 
 	//"io"
@@ -12,7 +12,7 @@ import (
 
 	// depends on libvips-dev
 	"github.com/daddye/vips"
-	"github.com/julienschmidt/httprouter"
+	//"github.com/go-chi/chi"
 )
 
 var breakpoints = map[string]breakpoint{
@@ -28,8 +28,8 @@ type breakpoint struct{
 	quality int
 }
 
-func uploadImage(db map[string]string, dir string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func uploadImage(db map[string]string, dir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		//r.ParseMultipartForm(32 << 20)
 
 		file, handler, err := r.FormFile("nt")
@@ -44,9 +44,10 @@ func uploadImage(db map[string]string, dir string) httprouter.Handle {
 	}
 }
 
-func serveDynamicImage() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		img := params.ByName("img")
+func serveDynamicImage() http.HandlerFunc  {
+	return func(w http.ResponseWriter, r *http.Request) {
+		img := path.Base(r.URL.Path)
+		fmt.Println(img)
 
 		sizeStart := strings.LastIndex(img, "-")
 		sizeEnd := len(img)-4
