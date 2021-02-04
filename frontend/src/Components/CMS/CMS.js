@@ -11,22 +11,26 @@ import Container from '@material-ui/core/Container'
 import { makeStyles } from "@material-ui/core/styles";
 
 import Editor from './Editor'
-import CMSCardList from './CMSFileList'
+import CMSFileList from './CMSFileList'
 
 export default function CMS(props) {
   const classes = useStyles()
+
+  const [rerender, setForceRender] = useState(true)
+
+  const forceRender = () => setForceRender(!rerender)
 
   return (
     <Container className={classes.fullscreen}>
         <Grid className={classes.fullscreen} container directon="row" >
           <Grid className={classes.widget} component={Paper} elevation={2} square={true} item xs={3}>
             <Box ml="5em" mt="5em" >
-              <CMSCardList posts={props.posts}/>
+              <CMSFileList render={rerender}/>
             </Box>
           </Grid>
           <Grid className="{classes.widget}" item xs={9}>
             <Box component={Paper} elevation={4} square={true} mx="5em" mt="2em">
-              <Editor />
+              <Editor {...props} forceRender={forceRender} />
             </Box>  
           </Grid>
         </Grid>

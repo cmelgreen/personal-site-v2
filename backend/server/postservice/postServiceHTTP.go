@@ -18,7 +18,7 @@ func (p *PostService) CreatePostHTTP() http.HandlerFunc {
 }
 
 // UpdatePostHTTP serves
-func (p *PostService) UpdatePostHTTP() http.HandlerFunc  {
+func (p *PostService) UpdatePostHTTP() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := p.updatePost(r.Context(), r.Body)
 		if err != nil {
@@ -47,7 +47,7 @@ func (p *PostService) DeletePostHTTP() http.HandlerFunc {
 }
 
 // GetPostHTTP serves
-func (p *PostService) GetPostHTTP() http.HandlerFunc  {
+func (p *PostService) GetPostHTTP() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := parseRequest(r)
 		if err != nil {

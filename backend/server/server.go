@@ -7,9 +7,8 @@ import (
 	"os"
 	"time"
 
-	"PersonalSite/backend/database"
+	"personal-site-v2/backend/server/database"
 
-	"github.com/rs/cors"
 	"github.com/go-chi/chi"
 )
 
@@ -25,10 +24,10 @@ var (
 
 // Server struct for storing database, mux, and logger
 type Server struct {
-	db  *database.Database
-	mux chi.Router
+	db         *database.Database
+	mux        chi.Router
 	middleware chi.Middlewares
-	log *log.Logger
+	log        *log.Logger
 }
 
 // NewServer returns new server with default log, mux, and database
@@ -42,13 +41,19 @@ func newServer(ctx context.Context) *Server {
 	return &s
 }
 
-func (s *Server) serve(port string) {
-	s.log.Fatal(http.ListenAndServe(port, s.mux))
+func (s *Server) printRoutes() {
+	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		s.log.Printf("%s %s \n", method, route)
+		return nil
+	}
+	
+	if err := chi.Walk(s.mux, walkFunc); err != nil {
+		s.log.Printf("Logging err: %s\n", err.Error())
+	}
 }
 
-func (s *Server) serveCORSEnabled(port string) {
-	muxCORS := cors.AllowAll().Handler(s.mux)
-	s.log.Fatal(http.ListenAndServe(port, muxCORS))
+func (s *Server) serve(port string) {
+	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }
 
 // NewDBConnection creates a new connection to a database for a server

@@ -23,8 +23,8 @@ var breakpoints = map[string]breakpoint{
 	"xl": {1920, 95},
 }
 
-type breakpoint struct{
-	size int
+type breakpoint struct {
+	size    int
 	quality int
 }
 
@@ -44,18 +44,17 @@ func uploadImage(db map[string]string, dir string) http.HandlerFunc {
 	}
 }
 
-func serveDynamicImage() http.HandlerFunc  {
+func serveDynamicImage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		img := path.Base(r.URL.Path)
-		fmt.Println(img)
 
 		sizeStart := strings.LastIndex(img, "-")
-		sizeEnd := len(img)-4
-		size := img[sizeStart+1:sizeEnd]
+		sizeEnd := len(img) - 4
+		size := img[sizeStart+1 : sizeEnd]
 
 		if _, ok := breakpoints[size]; ok {
 			img = img[:sizeStart] + img[sizeEnd:]
-		} 
+		}
 
 		p := "media/" + img
 
@@ -68,7 +67,7 @@ func serveDynamicImage() http.HandlerFunc  {
 		if img[sizeEnd:] == ".png" {
 			format = vips.PNG
 		}
-		
+
 		options := vips.Options{
 			Width:        breakpoints[size].size,
 			Height:       breakpoints[size].size,
@@ -77,7 +76,7 @@ func serveDynamicImage() http.HandlerFunc  {
 			Interpolator: vips.BILINEAR,
 			Gravity:      vips.CENTRE,
 			Quality:      breakpoints[size].quality,
-			Format:		  format,
+			Format:       format,
 		}
 		inBuf, _ := ioutil.ReadAll(f)
 		buf, err := vips.Resize(inBuf, options)
@@ -87,8 +86,7 @@ func serveDynamicImage() http.HandlerFunc  {
 		}
 
 		contentType := http.DetectContentType(buf)
-		fmt.Println(contentType)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//fmt.Println(contentType)
 		w.Header().Set("Content-Type", contentType)
 		w.Write(buf)
 	}

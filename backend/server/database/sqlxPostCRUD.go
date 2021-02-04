@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"PersonalSite/backend/postservice"
+	"personal-site-v2/backend/server/postservice"
 )
 
 // CreatePost creates

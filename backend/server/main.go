@@ -5,10 +5,13 @@ import (
 	"os"
 	"time"
 
-	"PersonalSite/backend/database"
-	"PersonalSite/backend/postservice"
+	"personal-site-v2/backend/server/postservice"
+	"personal-site-v2/backend/server/database"
 
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi"
+	// "github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
+	
 )
 
 // PULL INTO YAML FILE
@@ -51,9 +54,9 @@ func main() {
 
 	dbConfig := database.DBConfigFromValues{
 		Database: "postgres",
-		Host: "localhost",
-		Port: "5432",
-		User: "postgres",
+		Host:     "localhost",
+		Port:     "5432",
+		User:     "postgres",
 		Password: "postgres",
 	}
 
@@ -63,14 +66,22 @@ func main() {
 	richTextParser := &DraftJS{}
 
 	postService := postservice.NewPostService(s.db, richTextParser)
+	authApp := newFirebaseAuth("../credentials/firebase.json")
 
-	s.mux.Use(middleware.URLFormat)
+	s.mux.Use(cors.AllowAll().Handler)
+	//s.mux.Use(middleware.Compress(5))
 	
 	s.mux.Get(apiRoot+"/post/{slug}", postService.GetPostHTTP())
-	s.mux.Post(apiRoot+"/post", postService.CreatePostHTTP())
-	s.mux.Put(apiRoot+"/post", postService.UpdatePostHTTP())
-	s.mux.Delete(apiRoot+"/post/{slug}", postService.DeletePostHTTP())
 	s.mux.Get(apiRoot+"/post-summaries", postService.GetPostSummariesHTTP())
+
+	s.mux.Group(func(r chi.Router) {
+		//r.Use(testMiddlware)
+		r.Use(firebaseAuth(authApp))
+
+		r.Post(apiRoot+"/post/", postService.CreatePostHTTP())
+		r.Put(apiRoot+"/post/", postService.UpdatePostHTTP())
+		r.Delete(apiRoot+"/post/{slug}", postService.DeletePostHTTP())
+	})
 
 	// Get port and serve
 	port := os.Getenv(portEnvVar)
@@ -79,9 +90,11 @@ func main() {
 	}
 
 	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
-	s.log.Println("Serving")
+	s.log.Println("Serving:")
+	s.printRoutes()
 
 	//createDummyPost(ctx, s)
 
-	s.serveCORSEnabled(port)
+	s.serve(port)
 }
+

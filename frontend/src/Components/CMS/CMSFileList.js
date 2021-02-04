@@ -6,11 +6,21 @@ import axios from 'axios'
 
 import { List, ListItem, ListItemText} from '@material-ui/core'
 
-export default function CMSPostList(props) {
-  const posts = usePostSummaries()
+export default function CMSFileList(props) {
   const [selectedIndex, setSelectedIndex] = React.useState();
 
   const setSelected = i => setSelectedIndex(i)
+
+  const [posts, setPosts] = useState([])
+
+  useEffect(() => {
+    axios.get(apiPostSummaries, {params: {numPosts: 10}})
+      .then(resp => {
+        if ( resp.data.posts ) setPosts(resp.data.posts)
+      })
+      .catch(() => setPosts([]))
+  }, [props.render])
+  
 
   return (
     <List component="nav">

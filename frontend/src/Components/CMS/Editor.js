@@ -11,7 +11,7 @@ import { makeStyles } from "@material-ui/core/styles";
 // import { usePostByID, usePostSummaries, createPost, updatePost, deletePost } from '../../../Utils/ContentAPI'
 
 import Button from '@material-ui/core/Button';
-import { List, ListItem, ListItemText} from '@material-ui/core'
+import { List, ListItem, ListItemText } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid';
 
 import ClearIcon from '@material-ui/icons/Clear';
@@ -25,10 +25,21 @@ export default function Editor(props) {
   const classes = useStyles() 
 
   const slug = useParams().slug
+
   const [post, setPost] = useState(newPost)
 
-  const firstLoad = useRef(false)
+  const [idToken, setIdToken] = useState('')
 
+  useEffect(() => {
+    if (props.user) {
+      console.log(props.user)
+      props.user.getIdToken(/* forceRefresh */ true).then(idToken => setIdToken(idToken))
+    }
+    return () => setIdToken('')
+
+  },[props.user])
+
+  // Get post
   useEffect(() => {
     if ( slug ) {
       axios.get(apiPost + slug, {params: {raw: true}})
@@ -36,16 +47,21 @@ export default function Editor(props) {
         .catch(resp => {setPost(newPost)})
     }
 
+    props.forceRender()
+
+    return () => setPost(newPost)
+
   }, [slug])
 
   const save = useRef(false)
 
+  // setPost is async
   useEffect(() => {
     if ( save.current ) {
       if ( slug ) {
-        updatePost(post)
+        updatePost(post, idToken)
       } else {
-        createPost(post)
+        createPost(post, idToken)
           .then(() => history.push('/cms/' + post.slug))
           .catch(e => console.log(e))
       }
@@ -58,9 +74,12 @@ export default function Editor(props) {
   const postFields = ['title', 'slug', 'summary']
 
   const onSave = (richText) => {
+    
     setPost({...post, content: richText})
     save.current = true
   }
+
+  //////////////////// Pull into new component or function
 
   // const post = usePostByID(useParams().postID, true)
 
@@ -137,7 +156,7 @@ export default function Editor(props) {
               name: "deletePost",
               icon: <ClearIcon />,
               type: "callback",
-              onClick: () => {deletePost(post); history.push("/cms/")}
+              onClick: () => {deletePost(post, idToken); history.push("/cms/"); props.forceRender()}
           }
         ]}
         />
@@ -160,19 +179,25 @@ const apiPost = 'http://localhost:8080/api/post/'
 const api = axios.create({
   baseURL: apiPost,
   validateStatus: (status) => {
-       return status == 200;
-   },
+      return status == 200;
+  }
 });
 
-export const createPost = post => {
-  return api.post(apiPost, post)
+const createPost = (post, idToken) => {
+  return api.post(apiPost, post, {
+    headers: {
+      'Authorization': `Bearer ${idToken}` 
+  }})
 }
 
-export const updatePost = post => {
-  return api.put(apiPost, post)
+const updatePost = (post, idToken) => {
+  return api.put(apiPost, post, {
+    headers: {
+      'Authorization': `Bearer ${idToken}` 
+  }})
 }
 
-export const usePostBySlug = (slug, raw=false) => {
+const usePostBySlug = (slug, raw=false) => {
   const [post, setPost] = useState({})
 
   useEffect(() => {
@@ -186,6 +211,12 @@ export const usePostBySlug = (slug, raw=false) => {
   return [post, setPost]
 }
 
-export const deletePost = (post) => {
-  return api.delete(apiPost + post.slug)
+const deletePost = (post, idToken) => {
+  return api.delete(apiPost + post.slug, {
+    headers: {
+      'Authorization': `Bearer ${idToken}` 
+  }})
 }
+
+
+
