@@ -63,6 +63,11 @@ func (ir *imageResizeService) newUUID(r io.Reader) uuid.UUID {
 	return uuid.NewV5(ir.namespace, encoded)
 }
 
+func pathFromUUID(u uuid.UUID) string {
+	id := u.String()
+	return filepath.Join(id[0:2], id[2:4], id[4:])
+}
+
 func (ir *imageResizeService) uploadImage(image io.Reader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//r.ParseMultipartForm(32 << 20)
@@ -79,7 +84,7 @@ func (ir *imageResizeService) uploadImage(image io.Reader) http.HandlerFunc {
 }
 
 func (ir *imageResizeService) uuidPath(r io.Reader, rootDir string) string {
-	uid := ir.newUUID(r).String()
+	uid := pathFromUUID(ir.newUUID(r))
 	return filepath.Join(rootDir, uid)
 }
 
@@ -89,7 +94,6 @@ func (ir *imageResizeService) saveImageAllSizes(image io.Reader, rootDir string)
 
 	path := ir.uuidPath(uuidReader, rootDir)
 
-	fmt.Println(path)
 
 	readers, writers := createPipesForBreakpoints(ir.breakpoints) 
 	done := make(chan error)
