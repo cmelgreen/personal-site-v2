@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,31 +13,50 @@ import (
 type s3FileWriter struct{
 	batchSize int
 	readers map[string]io.Reader
+	readerMutex sync.Mutex
+	errChan chan error
 }
 
-func newS3FileWriter(batchSize int) (*s3FileWriter, chan error)  {
-	fileWriter := &s3FileWriter{
+func newS3FileUploader(batchSize int) (*s3FileWriter)  {
+	s := &s3FileWriter{
 		batchSize: batchSize,
 		readers: make(map[string]io.Reader, 0),
+		errChan: make(chan error),
 	}
 
-	errChan := make(chan error)
+	go func(){
+
+	}()
 
 	go func(){
 		for {
-			if len(fileWriter.readers) >= batchSize {
-				errChan <- fileWriter.batchUploadFiles("cm-personal-site-bucket", fileWriter.readers)
-				fileWriter.readers = make(map[string]io.Reader, 0)
+			s.readerMutex.Lock()
+			if len(s.readers) >= batchSize {
+				s.errChan <- s.batchUploadFiles("cm-personal-site-bucket", s.readers)
+				s.readers = make(map[string]io.Reader, 0)
+				close(s.errChan)
 			}
+			s.readerMutex.Unlock()
 		}
 	}()
 
-	return fileWriter, errChan
+	return s
+}
 
+func (s *s3FileWriter) getUploadErr() error {
+	for err := range s.errChan {
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *s3FileWriter)  writeFile(path string, r io.Reader) error {
+	s.readerMutex.Lock()
 	s.readers[path] = r
+	s.readerMutex.Unlock()
 	return nil
 }
 
@@ -50,17 +69,8 @@ func (s *s3FileWriter) batchUploadFiles(bucket string, files map[string]io.Reade
 		fmt.Println("ERROR:", err)
 		return err
 	}
-	fmt.Println(sess)
-
-	region, err := s3manager.GetBucketRegion(context.Background(), sess, bucket, "us-west-2")
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	fmt.Println(region)
 
 	svc := s3manager.NewUploader(sess)
-	fmt.Println(svc)
 	
 	objects := []s3manager.BatchUploadObject{}
 
