@@ -1,7 +1,6 @@
-package main
+package imageresizeservice
 
 import (
-	"fmt"
 	"io"
 	"sync"
 
@@ -23,10 +22,6 @@ func newS3FileUploader(batchSize int) (*s3FileWriter)  {
 		readers: make(map[string]io.Reader, 0),
 		errChan: make(chan error),
 	}
-
-	go func(){
-
-	}()
 
 	go func(){
 		for {
@@ -61,12 +56,10 @@ func (s *s3FileWriter)  writeFile(path string, r io.Reader) error {
 }
 
 func (s *s3FileWriter) batchUploadFiles(bucket string, files map[string]io.Reader) error {
-	fmt.Println("In s3 uploader")
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
 	})
 	if err != nil {
-		fmt.Println("ERROR:", err)
 		return err
 	}
 

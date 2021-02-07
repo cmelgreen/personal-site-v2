@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"personal-site-v2/backend/server/postservice"
+	"personal-site-v2/backend/server/imageresizeservice"
 	"personal-site-v2/backend/server/database"
 
 	"github.com/go-chi/chi"
 	// "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
-	
+
 )
 
 // PULL INTO YAML FILE
@@ -89,6 +90,7 @@ func main() {
 		port = defaultPort
 	}
 
+	s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
 	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.log.Println("Serving:")
 	s.printRoutes()

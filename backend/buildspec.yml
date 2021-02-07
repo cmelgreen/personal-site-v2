@@ -4,7 +4,7 @@ phases:
   pre_build:
     commands:
       - cd backend/server
-      - go get -d ./...
+      - GO111MODULE=on go get -d ./...
 
   build:
     commands:
