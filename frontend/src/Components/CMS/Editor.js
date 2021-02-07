@@ -74,9 +74,26 @@ export default function Editor(props) {
   const postFields = ['title', 'slug', 'summary']
 
   const onSave = (richText) => {
-    
     setPost({...post, content: richText})
     save.current = true
+  }
+
+  const uploadImage = (image) => {
+    const formData = new FormData()
+
+    formData.append(
+      "image",
+      image
+    )
+
+    axios.post('http://localhost:8080/api/img/', formData, {
+      headers: { 'content-type': 'multipart/form-data' }
+    })
+    .then(resp => {
+      console.log(resp)
+      setPost({...post, img: resp.data.path})
+    })
+    .catch(resp => console.log(resp))
   }
 
   //////////////////// Pull into new component or function
@@ -137,6 +154,7 @@ export default function Editor(props) {
           Upload File
           <input
             type="file"
+            onChange={e => uploadImage(e.target.files[0])}
             hidden
           />
       </Button>
@@ -217,6 +235,3 @@ const deletePost = (post, idToken) => {
       'Authorization': `Bearer ${idToken}` 
   }})
 }
-
-
-
