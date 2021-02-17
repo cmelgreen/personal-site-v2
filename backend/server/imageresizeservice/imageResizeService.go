@@ -3,16 +3,16 @@ package imageresizeservice
 import (
 	"bytes"
 	"encoding/base32"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 	"os"
 
 	"path/filepath"
 
 	"io"
 	"io/ioutil"
-	
+
 	uuid "github.com/satori/go.uuid"
 
 	// depends on libvips-dev
@@ -201,8 +201,7 @@ func resizeImage(image io.Reader, b breakpoint) io.Reader {
 	return bytes.NewReader(outBuf)
 }
 
-
-type writer struct {}
+type writer struct{}
 
 func (w writer) writeFile(path string, r io.Reader) error {
 	// bytes, err := ioutil.ReadAll(r)

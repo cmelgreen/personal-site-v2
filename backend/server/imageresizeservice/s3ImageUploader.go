@@ -9,21 +9,21 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-type s3FileWriter struct{
-	batchSize int
-	readers map[string]io.Reader
+type s3FileWriter struct {
+	batchSize   int
+	readers     map[string]io.Reader
 	readerMutex sync.Mutex
-	errChan chan error
+	errChan     chan error
 }
 
-func newS3FileUploader(batchSize int) (*s3FileWriter)  {
+func newS3FileUploader(batchSize int) *s3FileWriter {
 	s := &s3FileWriter{
 		batchSize: batchSize,
-		readers: make(map[string]io.Reader, 0),
-		errChan: make(chan error),
+		readers:   make(map[string]io.Reader, 0),
+		errChan:   make(chan error),
 	}
 
-	go func(){
+	go func() {
 		for {
 			s.readerMutex.Lock()
 			if len(s.readers) >= batchSize {
@@ -48,7 +48,7 @@ func (s *s3FileWriter) getUploadErr() error {
 	return nil
 }
 
-func (s *s3FileWriter)  writeFile(path string, r io.Reader) error {
+func (s *s3FileWriter) writeFile(path string, r io.Reader) error {
 	s.readerMutex.Lock()
 	s.readers[path] = r
 	s.readerMutex.Unlock()
@@ -64,18 +64,19 @@ func (s *s3FileWriter) batchUploadFiles(bucket string, files map[string]io.Reade
 	}
 
 	svc := s3manager.NewUploader(sess)
-	
+
 	objects := []s3manager.BatchUploadObject{}
 
 	for path := range files {
 		objects = append(objects, s3manager.BatchUploadObject{
 			Object: &s3manager.UploadInput{
-				Key: aws.String(path),
-				Body: files[path],
+				Key:    aws.String(path),
+				Body:   files[path],
 				Bucket: aws.String(bucket),
 			},
 		},
-	)}
+		)
+	}
 
 	iter := &s3manager.UploadObjectsIterator{Objects: objects}
 	err = svc.UploadWithIterator(aws.BackgroundContext(), iter)
