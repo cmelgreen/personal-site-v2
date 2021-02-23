@@ -1,6 +1,9 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      - 
   build:
     commands:
       - cd backend/server

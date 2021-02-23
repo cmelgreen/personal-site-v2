@@ -58,7 +58,6 @@ locals {
 resource "aws_codebuild_project" "site_codebuild" {
   name          = "site-codebuild"
   description   = "test_site_codebuild_project"
-  build_timeout = "5"
   service_role  = aws_iam_role.codebuild_iam_role.arn
 
   artifacts {
@@ -94,7 +93,6 @@ resource "aws_codebuild_project" "site_codebuild" {
 resource "aws_codebuild_project" "backend_codebuild" {
   name          = "site-backend-codebuild"
   description   = "backend_codebuild_project"
-  build_timeout = "5"
   service_role  = aws_iam_role.codebuild_iam_role.arn
 
   artifacts {
