@@ -4,7 +4,7 @@ phases:
   build:
     commands:
       - cd backend/server
-      - export GO1111MODULE=on
+      - export GO111MODULE=on
       - go mod download
       - go build -o server *.go
 
