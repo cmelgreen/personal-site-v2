@@ -4,7 +4,7 @@ phases:
   build:
     commands:
       - cd backend/server
-      - go mod download
+      - GOMODULE111=on go mod download
       - go build -o server *.go
 
 artifacts:
