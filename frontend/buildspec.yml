@@ -12,3 +12,7 @@ artifacts:
   files:
     - '**/*'
   base-directory: frontend/build
+
+cache:
+  paths:
+    - '/root/.m2/**/*'

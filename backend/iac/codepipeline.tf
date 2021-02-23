@@ -83,13 +83,13 @@ resource "aws_codebuild_project" "site_codebuild" {
     type            = "CODEPIPELINE"
     buildspec       = "frontend/buildspec.yml"
   }
+
+  cache {
+    type    = "LOCAL"
+    modes   = ["LOCAL_SOURCE_CACHE"]
+  }
   
 }
-
-# resource "aws_codebuild_webhook" "webhook" {
-#   project_name = aws_codebuild_project.site_codebuild.name
-#   branch_filter = "master"
-# }
 
 resource "aws_codebuild_project" "backend_codebuild" {
   name          = "site-backend-codebuild"
@@ -118,6 +118,11 @@ resource "aws_codebuild_project" "backend_codebuild" {
   source {
     type            = "CODEPIPELINE"
     buildspec       = "backend/buildspec.yml"
+  }
+
+  cache {
+    type    = "LOCAL"
+    modes   = ["LOCAL_SOURCE_CACHE"]
   }
 }
 
