@@ -83,3 +83,7 @@ func (s *Server) maintainDBConnection(ctx context.Context, dbConfig database.DBC
 		}
 	}()
 }
+
+func status(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("okay"))
+}

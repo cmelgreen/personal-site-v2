@@ -7,6 +7,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import { convertToRaw } from 'draft-js'
 
 import { makeStyles } from "@material-ui/core/styles";
+import { createPost, updatePost, usePostBySlug, deletePost } from '../../API/API'
 
 // import { usePostByID, usePostSummaries, createPost, updatePost, deletePost } from '../../../Utils/ContentAPI'
 
@@ -197,46 +198,3 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const apiPost = 'http://localhost:8080/api/post/'
-
-const api = axios.create({
-  baseURL: apiPost,
-  validateStatus: (status) => {
-      return status == 200;
-  }
-});
-
-const createPost = (post, idToken) => {
-  return api.post(apiPost, post, {
-    headers: {
-      'Authorization': `Bearer ${idToken}` 
-  }})
-}
-
-const updatePost = (post, idToken) => {
-  return api.put(apiPost, post, {
-    headers: {
-      'Authorization': `Bearer ${idToken}` 
-  }})
-}
-
-const usePostBySlug = (slug, raw=false) => {
-  const [post, setPost] = useState({})
-
-  useEffect(() => {
-    if (slug) {
-      api.get(apiPost + slug, {params: {raw}})
-        .then(resp => setPost(resp.data))
-        .catch(resp => setPost({}))
-    }
-  }, [slug])
-
-  return [post, setPost]
-}
-
-const deletePost = (post, idToken) => {
-  return api.delete(apiPost + post.slug, {
-    headers: {
-      'Authorization': `Bearer ${idToken}` 
-  }})
-}

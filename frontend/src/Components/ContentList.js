@@ -3,11 +3,10 @@ import { forwardRef } from 'react';
 import Typography from '@material-ui/core/Typography';
 import ContentCard from './ContentCard.js'
 import Grid from '@material-ui/core/Grid'
-import Box from '@material-ui/core/Box'
-import axios from 'axios'
 
 import { makeStyles } from "@material-ui/core/styles";
-import { FullscreenExit } from '@material-ui/icons';
+
+import usePostSummaries from '../API/API'
 
 const ContentList = forwardRef((props, ref) => {
   const posts = usePostSummaries()
@@ -50,20 +49,6 @@ const ContentList = forwardRef((props, ref) => {
   )
 })
 
-const apiPostSummaries = "http://localhost:8080/api/post-summaries"
 
-export const usePostSummaries = (numPosts=10) => {
-  const [posts, setPosts] = useState([])
-
-  useEffect(() => {
-    axios.get(apiPostSummaries, {params: {numPosts}})
-      .then(resp => {
-        console.log(resp)
-        if ( resp.data.posts ) setPosts(resp.data.posts)})
-      .catch(() => setPosts([]))
-  }, [])
-
-  return posts
-}
 
 export default ContentList
