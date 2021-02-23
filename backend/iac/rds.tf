@@ -11,7 +11,7 @@ resource "aws_db_instance" "rds" {
       engine_version            = "12.5"
       publicly_accessible       = true
 
-    vpc_security_group_ids    = [aws_security_group.public_http_sg.id]
+    vpc_security_group_ids    = [aws_security_group.rds_sg.id]
     db_subnet_group_name      = aws_db_subnet_group.subnet_group.name
 }
 
@@ -30,6 +30,7 @@ resource "aws_security_group" "rds_sg" {
         to_port         = 5432
         protocol        = "tcp"
         security_groups = [aws_security_group.public_http_sg.id]
+        cidr_blocks = ["0.0.0.0/0"]
     }
 
     egress {
