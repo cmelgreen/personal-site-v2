@@ -124,67 +124,23 @@ resource "aws_cloudfront_distribution" "site_distribution" {
   }
 }
 
-
-resource "aws_autoscaling_group" "backend_asg" {
-    name                        = "backend-asg"
-
-    min_size                    = 1
-    max_size                    = 1
-    desired_capacity            = 1
-
-    health_check_grace_period   = 30
-    health_check_type           = "EC2"
-    force_delete                = true
-
-    launch_configuration        = aws_launch_configuration.backend_lc.name
-    vpc_zone_identifier         = [aws_subnet.public_subnet.id]
-
-    load_balancers              = [aws_elb.backend_elb.name]
-}
-
-resource "aws_launch_configuration" "backend_lc" {
-    name                        = "backend-lc-${formatdate("YY-MM-DD-HH-mm", timestamp())}"
-
-    image_id                    = "ami-0be2609ba883822ec"
+resource "aws_instance" "backend_ec2" {
+    ami                         = "ami-0be2609ba883822ec"
     instance_type               = "t2.nano"
-    user_data                   = file("lc_user_data.sh")
-
-    security_groups             = [aws_security_group.public_http_sg.id]
-    iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
+    associate_public_ip_address = true
     key_name                    = "zoff3"
 
-    associate_public_ip_address = true
+    iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
+    
+    subnet_id                   = aws_subnet.public_subnet.id
+    vpc_security_group_ids      = [aws_security_group.public_http_sg.id]
 
-    root_block_device {
-        volume_type             = "gp2"
-        volume_size             = 30
+    user_data                   = file("lc_user_data.sh")
+
+    tags = {
+      codedeploy = "personal-site-backend"
     }
 
-    lifecycle {
-        // AWS throws an error if false
-        create_before_destroy   = true
-    }
-}
-
-resource "aws_elb" "backend_elb" {
-    name                        = "backend-elb"
-    security_groups             = [aws_security_group.public_http_sg.id]
-    subnets                     = [aws_subnet.public_subnet.id]
-
-    listener {
-        lb_port                 = 80
-        lb_protocol             = "HTTP"
-        instance_port           = 80
-        instance_protocol       = "HTTP"
-    }
-
-    health_check {
-        healthy_threshold       = 2
-        unhealthy_threshold     = 2
-        timeout                 = 3
-        interval                = 30
-        target                  = "HTTP:80/"
-    }
 }
 
 resource "aws_iam_role" "backend_iam_role" {
