@@ -92,6 +92,7 @@ func main() {
 
 	//s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
 	//s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
+	s.mux.Get(apiRoot+"/status", status)
 	s.log.Println("Serving:")
 	s.printRoutes()
 
@@ -99,4 +100,3 @@ func main() {
 
 	s.serve(port)
 }
-
