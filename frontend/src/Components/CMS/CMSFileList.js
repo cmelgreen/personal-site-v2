@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 
 import axios from 'axios'
 
+import { usePostSummaries, apiPostSummaries } from '../../API/API'
+
 import { List, ListItem, ListItemText} from '@material-ui/core'
 
 export default function CMSFileList(props) {
@@ -50,20 +52,4 @@ export default function CMSFileList(props) {
         ))}
     </List>
   )
-}
-
-const apiPostSummaries = "http://localhost:8080/api/post-summaries"
-
-export const usePostSummaries = (numPosts=10) => {
-  const [posts, setPosts] = useState([])
-
-  useEffect(() => {
-    axios.get(apiPostSummaries, {params: {numPosts}})
-      .then(resp => {
-        if ( resp.data.posts ) setPosts(resp.data.posts)
-      })
-      .catch(() => setPosts([]))
-    }, [])
-
-  return posts
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"personal-site-v2/backend/server/database"
 
 	"github.com/go-chi/chi"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 const (
@@ -54,6 +56,26 @@ func (s *Server) printRoutes() {
 
 func (s *Server) serve(port string) {
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
+}
+
+func (s *Server) serveHTTPS(port string) {
+	cert := autocert.Manager{
+		Prompt: autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist("api.cmelgreen.com"),
+		Cache:  autocert.DirCache("../."),
+	}
+
+	httpsMux := &http.Server{
+		Addr:    ":443",
+		Handler: s.mux,
+		TLSConfig: &tls.Config{
+			GetCertificate: cert.GetCertificate,
+		},
+	}
+
+	go http.ListenAndServe(":80", cert.HTTPHandler(nil))
+	httpsMux.ListenAndServeTLS("", "")
+
 }
 
 // NewDBConnection creates a new connection to a database for a server
