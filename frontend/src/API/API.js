@@ -3,7 +3,7 @@ import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios';
 
-const apiRoot = "https://api.cmelgreen.com/"
+const apiRoot = "https://api.cmelgreen.com/api/"
 export const apiPostSummaries = apiRoot + "post-summaries"
 export const apiPost = apiRoot + "post/"
 
