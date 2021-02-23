@@ -7,7 +7,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import { convertToRaw } from 'draft-js'
 
 import { makeStyles } from "@material-ui/core/styles";
-import { createPost, updatePost, usePostBySlug, deletePost } from '../../API/API'
+import { createPost, updatePost, usePostBySlug, deletePost, apiPost } from '../../API/API'
 
 // import { usePostByID, usePostSummaries, createPost, updatePost, deletePost } from '../../../Utils/ContentAPI'
 

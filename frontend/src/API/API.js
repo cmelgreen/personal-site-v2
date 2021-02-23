@@ -1,8 +1,11 @@
+import React from 'react'
+
+import { useState, useEffect, useRef } from 'react'
 import axios from 'axios';
 
 const apiRoot = "http://api.cmelgreen.com/"
 const apiPostSummaries = apiRoot + "post-summaries"
-const apiPost = apiRoot + "post/"
+export const apiPost = apiRoot + "post/"
 
 export const usePostSummaries = (numPosts=10) => {
   const [posts, setPosts] = useState([])
