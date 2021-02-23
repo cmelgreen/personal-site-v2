@@ -29,6 +29,7 @@ export default function Editor(props) {
   const [post, setPost] = useState(newPost)
 
   const [idToken, setIdToken] = useState('')
+  const [preview, setPreview] = useState()
 
   useEffect(() => {
     if (props.user) {
@@ -80,6 +81,11 @@ export default function Editor(props) {
 
   const uploadImage = (image) => {
     const formData = new FormData()
+    const reader = new FileReader()
+    const url = readAsDataURL(image)
+
+    setPreview(url)
+
 
     formData.append(
       "image",
