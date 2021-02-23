@@ -3,8 +3,8 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      - golang: latest
-      
+      golang: latest
+
   build:
     commands:
       - cd backend/server
