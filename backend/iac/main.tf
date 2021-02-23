@@ -44,6 +44,7 @@ resource "aws_cloudfront_distribution" "site_distribution" {
   is_ipv6_enabled     = true
   comment             = "test"
   default_root_object = "index.html"
+  aliases             = ["cmelgreen.com"]
 
 
   default_cache_behavior {
@@ -120,8 +121,19 @@ resource "aws_cloudfront_distribution" "site_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn            = "arn:aws:acm:us-east-1:010629071893:certificate/9d39f14e-5b96-4af6-a32d-ae541237d6f0"
+    cloudfront_default_certificate = false
+    minimum_protocol_version       = "TLSv1.2_2019"
+    ssl_support_method             = "sni-only"
   }
+
+  custom_error_response {
+    error_caching_min_ttl = 10
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
+
 }
 
 resource "aws_instance" "backend_ec2" {
