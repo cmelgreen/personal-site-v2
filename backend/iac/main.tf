@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "site_bucket" {
-  bucket = "cm-personal-site-bucket"
+  bucket = "cm-personal-site-v2-bucket"
   acl    = "public-read"
   policy = <<POLICY
 {
@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "site_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::cm-personal-site-bucket/*"
+            "Resource": "arn:aws:s3:::cm-personal-site-v2-bucket/*"
         }
     ]
 }
