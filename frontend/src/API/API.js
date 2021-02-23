@@ -25,21 +25,21 @@ const api = axios.create({
   }
 });
 
-const createPost = (post, idToken) => {
+export const createPost = (post, idToken) => {
   return api.post(apiPost, post, {
     headers: {
       'Authorization': `Bearer ${idToken}` 
   }})
 }
 
-const updatePost = (post, idToken) => {
+export const updatePost = (post, idToken) => {
   return api.put(apiPost, post, {
     headers: {
       'Authorization': `Bearer ${idToken}` 
   }})
 }
 
-const usePostBySlug = (slug, raw=false) => {
+export const usePostBySlug = (slug, raw=false) => {
   const [post, setPost] = useState({})
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const usePostBySlug = (slug, raw=false) => {
   return [post, setPost]
 }
 
-const deletePost = (post, idToken) => {
+export const deletePost = (post, idToken) => {
   return api.delete(apiPost + post.slug, {
     headers: {
       'Authorization': `Bearer ${idToken}` 
