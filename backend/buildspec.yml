@@ -1,13 +1,10 @@
 version: 0.2
 
 phases:
-  pre_build:
+  build:
     commands:
       - cd backend/server
       - GO111MODULE=on go get -d ./...
-
-  build:
-    commands:
       - go build -o server *.go
 
 artifacts:
