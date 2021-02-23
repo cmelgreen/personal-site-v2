@@ -5,8 +5,6 @@ go 1.15
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/aws/aws-sdk-go v1.37.5
-	github.com/aws/aws-sdk-go-v2 v1.1.0 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.1.0 // indirect
 	github.com/daddye/vips v0.0.0-20170307215529-87cfaf94f7a1
 	github.com/ejilay/draftjs v0.0.0-20181017100243-f7de0faf30aa
 	github.com/go-chi/chi v1.5.1
