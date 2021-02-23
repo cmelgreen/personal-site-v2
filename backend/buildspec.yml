@@ -4,7 +4,7 @@ phases:
   build:
     commands:
       - cd backend/server
-      - GO111MODULE=on go get -d ./...
+      - go mod download
       - go build -o server *.go
 
 artifacts:
@@ -16,4 +16,4 @@ artifacts:
 
 cache:
   paths:
-    - '/root/.goenv/**/*'
+    - '/go/pkg/**/*'
