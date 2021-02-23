@@ -91,7 +91,7 @@ func main() {
 	}
 
 	//s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
-	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
+	//s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.log.Println("Serving:")
 	s.printRoutes()
 
