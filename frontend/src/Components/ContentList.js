@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid'
 
 import { makeStyles } from "@material-ui/core/styles";
 
-import usePostSummaries from '../API/API'
+  import { usePostSummaries } from '../API/API'
 
 const ContentList = forwardRef((props, ref) => {
   const posts = usePostSummaries()
