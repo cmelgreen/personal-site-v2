@@ -98,5 +98,5 @@ func main() {
 
 	//createDummyPost(ctx, s)
 
-	s.serve(port)
+	s.serveHTTPS(port)
 }
