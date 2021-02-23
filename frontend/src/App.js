@@ -56,7 +56,7 @@ const theme = createMuiTheme({
 });
 
 // Configure Firebase.
-const config = require('./credentials/firebase.json')
+const config = require('./firebase/firebase.json')
 
 export default function App() {
   const scrollRef = useRef("scrollRef");
