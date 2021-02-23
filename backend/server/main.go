@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"personal-site-v2/backend/server/postservice"
-	"personal-site-v2/backend/server/imageresizeservice"
+	//"personal-site-v2/backend/server/imageresizeservice"
 	"personal-site-v2/backend/server/database"
 
 	"github.com/go-chi/chi"
@@ -22,7 +22,7 @@ const (
 
 	// Default environment variable for serving and default port
 	portEnvVar  = "PERSONAL_SITE_PORT"
-	defaultPort = ":8080"
+	defaultPort = ":80"
 	frontendDir = "/frontend/static"
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
@@ -90,7 +90,7 @@ func main() {
 		port = defaultPort
 	}
 
-	s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
+	//s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
 	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.log.Println("Serving:")
 	s.printRoutes()
