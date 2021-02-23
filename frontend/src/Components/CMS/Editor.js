@@ -82,10 +82,9 @@ export default function Editor(props) {
   const uploadImage = (image) => {
     const formData = new FormData()
     const reader = new FileReader()
-    const url = readAsDataURL(image)
+    const url = reader.readAsDataURL(image)
 
     setPreview(url)
-
 
     formData.append(
       "image",
