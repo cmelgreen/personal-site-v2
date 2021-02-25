@@ -48,12 +48,7 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
     },    
     {
       "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
-        "ecr:GetAuthorizationToken",
-        "ecr:InitiateLayerUpload",
-        "ecr:PutImage",
-        "ecr:UploadLayerPart"
+        "ecr:*"
       ],
       "Resource": "*",
       "Effect": "Allow"

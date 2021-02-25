@@ -2,8 +2,6 @@ version: 0.0
 os: linux
 
 files:
-  - source: server/server
-    destination: /
   - source: scripts/
     destination: /scripts
 
