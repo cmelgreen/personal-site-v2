@@ -26,7 +26,3 @@ artifacts:
     - 'appspec.yml'
     - 'scripts/*'
   base-directory: backend
-
-cache:
-  paths:
-    - '/go/pkg/**/*'
