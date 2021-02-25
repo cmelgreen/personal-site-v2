@@ -5,7 +5,7 @@ phases:
     commands:
       - cd backend
       - docker build -t server .
-      - docker tag 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest
+      - docker tag server 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest
 
   post_build:
     commands:
