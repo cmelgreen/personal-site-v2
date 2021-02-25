@@ -3,7 +3,7 @@ provider "github" {
 }
 
 resource "aws_iam_role" "codebuild_iam_role" {
-  name = "example"
+  name = "codebuild_iam_role"
 
   assume_role_policy = <<POLICY
 {
@@ -370,16 +370,24 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
       "Resource": "*"
     },
     {
+      "Effect": "Allow",
       "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
         "ecr:GetAuthorizationToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:GetRepositoryPolicy",
+        "ecr:DescribeRepositories",
+        "ecr:ListImages",
+        "ecr:DescribeImages",
+        "ecr:BatchGetImage",
+        "ecr:ListTagsForResource",
+        "ecr:DescribeImageScanFindings",
         "ecr:InitiateLayerUpload",
-        "ecr:PutImage",
-        "ecr:UploadLayerPart"
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
       ],
-      "Resource": "*",
-      "Effect": "Allow"
+      "Resource": "*"
     }
   ]
 }
