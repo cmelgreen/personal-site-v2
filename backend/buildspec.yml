@@ -1,15 +1,12 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      golang: latest
-
   build:
     commands:
+      - cd backend
       - docker build -t server .
 
-  post_build: 
+  post_build:
     commands:
       - docker push 010629071893.dkr.ecr.us-east-1.amazonaws.com/test
 
