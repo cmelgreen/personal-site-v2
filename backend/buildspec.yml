@@ -13,8 +13,6 @@ phases:
   build:
     commands:
       - cd backend
-      - docker build -t test .
-      - docker tag server 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest
       - docker build --cache-from 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest --tag 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest .
 
   post_build:
