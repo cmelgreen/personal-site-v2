@@ -1,4 +1,4 @@
-FROM golang:1.16.0
+FROM 010629071893.dkr.ecr.us-east-1.amazonaws.com/golang:latest
 
 RUN apt-get -y update && apt-get -y install libvips-dev \
     && rm -rf /var/lib/apt/lists/*
