@@ -101,8 +101,9 @@ resource "aws_codebuild_project" "backend_codebuild" {
 
   environment {
     compute_type                = "BUILD_GENERAL1_LARGE"
-    image                       = "aws/codebuild/standard:3.0"
+    image                       = "aws/codebuild/standard:4.0"
     type                        = "LINUX_CONTAINER"
+    privileged_mode             = true
     image_pull_credentials_type = "CODEBUILD"
   }
 
