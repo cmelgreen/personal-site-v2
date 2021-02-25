@@ -45,6 +45,18 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
         "s3:*"
       ],
       "Resource": "*"
+    },    
+    {
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetAuthorizationToken",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
     }
   ]
 }
@@ -121,7 +133,7 @@ resource "aws_codebuild_project" "backend_codebuild" {
 
   cache {
     type    = "LOCAL"
-    modes   = ["LOCAL_SOURCE_CACHE"]
+    modes   = ["LOCAL_DOCKER_LAYER_CACHE"]
   }
 }
 
@@ -356,6 +368,18 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         "codedeploy:*"
       ],
       "Resource": "*"
+    },
+    {
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetAuthorizationToken",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
     }
   ]
 }
