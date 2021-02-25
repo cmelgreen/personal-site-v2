@@ -1,7 +1,7 @@
 resource "aws_db_instance" "rds" {
       identifier                = "personal-site-db"
       username                  = "postgres"
-      password                  = "postgres"
+      password                  = "postgres-personal-site"
       final_snapshot_identifier = "personal-site-db-snahpshot"
       skip_final_snapshot       = true
       allocated_storage         = 5
@@ -30,7 +30,8 @@ resource "aws_security_group" "rds_sg" {
         to_port         = 5432
         protocol        = "tcp"
         security_groups = [aws_security_group.public_http_sg.id]
-        cidr_blocks = ["0.0.0.0/0"]
+        
+        cidr_blocks = [file("local_ip_credentials")]
     }
 
     egress {

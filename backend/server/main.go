@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"personal-site-v2/backend/server/postservice"
-	//"personal-site-v2/backend/server/imageresizeservice"
+	"personal-site-v2/backend/server/imageresizeservice"
 	"personal-site-v2/backend/server/database"
 
 	"github.com/go-chi/chi"
@@ -20,10 +20,12 @@ const (
 	// Default timeout length
 	timeout = 10
 
+
 	// Default environment variable for serving and default port
 	portEnvVar  = "PERSONAL_SITE_PORT"
 	defaultPort = ":80"
 	frontendDir = "/frontend/static"
+	ssl 		= false
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
 	baseAWSRegion  = "AWS_REGION"
@@ -45,21 +47,21 @@ func main() {
 	s := newServer(ctx)
 
 	// Setup DB for API
-	dbConfig := database.DBConfigFromAWS{
-		BaseAWSRegion:  baseAWSRegion,
-		BaseAWSRoot:    baseAWSRoot,
-		BaseConfigName: baseConfigName,
-		BaseConfigPath: baseConfigPath,
-		WithEncrpytion: withEncrpytion,
-	}
-
-	// dbConfig := database.DBConfigFromValues{
-	// 	Database: "postgres",
-	// 	Host:     "localhost",
-	// 	Port:     "5432",
-	// 	User:     "postgres",
-	// 	Password: "postgres",
+	// dbConfig := database.DBConfigFromAWS{
+	// 	BaseAWSRegion:  baseAWSRegion,
+	// 	BaseAWSRoot:    baseAWSRoot,
+	// 	BaseConfigName: baseConfigName,
+	// 	BaseConfigPath: baseConfigPath,
+	// 	WithEncrpytion: withEncrpytion,
 	// }
+
+	dbConfig := database.DBConfigFromValues{
+		Database: "postgres",
+		Host:     "personal-site-db.cjarn4dqfsir.us-east-1.rds.amazonaws.com",
+		Port:     "5432",
+		User:     "postgres",
+		Password: "postgres-personal-site",
+	}
 
 	s.newDBConnection(ctx, dbConfig)
 
@@ -90,13 +92,18 @@ func main() {
 		port = defaultPort
 	}
 
-	//s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
-	//s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
+	s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("../../frontend/public/media", "test"))
+	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.mux.Get(apiRoot+"/status", status)
 	s.log.Println("Serving:")
 	s.printRoutes()
 
 	//createDummyPost(ctx, s)
 
-	s.serveHTTPS(port)
+	if ssl {
+		s.serveHTTPS(port)
+	} else {
+		s.serve(port)
+	}
+	
 }

@@ -16,7 +16,7 @@ type s3FileWriter struct {
 	errChan     chan error
 }
 
-func newS3FileUploader(batchSize int) *s3FileWriter {
+func newS3FileUploader(bucket string, batchSize int) *s3FileWriter {
 	s := &s3FileWriter{
 		batchSize: batchSize,
 		readers:   make(map[string]io.Reader, 0),
@@ -27,7 +27,7 @@ func newS3FileUploader(batchSize int) *s3FileWriter {
 		for {
 			s.readerMutex.Lock()
 			if len(s.readers) >= batchSize {
-				s.errChan <- s.batchUploadFiles("cm-personal-site-bucket", s.readers)
+				s.errChan <- s.batchUploadFiles(bucket, s.readers)
 				s.readers = make(map[string]io.Reader, 0)
 				close(s.errChan)
 			}
