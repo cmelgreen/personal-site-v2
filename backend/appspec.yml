@@ -2,14 +2,14 @@ version: 0.0
 os: linux
 
 files:
-  - source: scripts/
-    destination: /scripts
+  - source: .
+    destination: .
 
 hooks:
   ApplicationStop:
-    - location: scripts/stop_container.sh
+    - location: stop_container.sh
   BeforeInstall:
-     - location: scripts/before_install.sh
+     - location: before_install.sh
   ApplicationStart:
-    - location: scripts/start_container.sh
+    - location: start_container.sh
       timeout: 120
