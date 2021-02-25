@@ -7,14 +7,14 @@ phases:
 
   build:
     commands:
-      - cd backend/server
-      - export GO111MODULE=on
-      - go mod download
-      - go build -o server *.go
+      - docker build -t server .
+
+  post-build:
+    commands:
+      - docker push 010629071893.dkr.ecr.us-east-1.amazonaws.com/test
 
 artifacts:
   files:
-    - 'server/server'
     - 'appspec.yml'
     - 'scripts/*'
   base-directory: backend

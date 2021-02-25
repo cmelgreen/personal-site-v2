@@ -64,9 +64,9 @@ func CreateImageHTTP(rootDir, namespace string) http.HandlerFunc {
 		}
 		defer file.Close()
 
-		//s := newS3FileUploader(len(defaultBreakpoints))
-		writer := writer{}
-		ir := newImageResizeService(defaultBreakpoints, namespace, writer)
+		s := newS3FileUploader("cm-personal-site-v2-bucket", len(defaultBreakpoints))
+		//writer := writer{}
+		ir := newImageResizeService(defaultBreakpoints, namespace, s)
 
 		path, err := ir.saveImageAllSizes(file, rootDir)
 		if err != nil {
@@ -75,12 +75,12 @@ func CreateImageHTTP(rootDir, namespace string) http.HandlerFunc {
 			return
 		}
 
-		// err = s.getUploadErr()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	http.Error(w, err.Error(), http.StatusBadRequest)
-		// 	return
-		// }
+		err = s.getUploadErr()
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 		fmt.Println("No errors uploading to ", path)
 
