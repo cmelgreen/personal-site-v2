@@ -1,23 +1,28 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      docker: 19
+
+  pre_build:
+    commands:
+    - $(aws ecr get-login --no-include-email)
+    - docker pull 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest || true
+
   build:
     commands:
       - cd backend
       - docker build -t test .
       - docker tag server 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest
+      - docker build --cache-from 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest --tag 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest .
 
   post_build:
     commands:
       - docker push 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest
-
 
 artifacts:
   files:
     - 'appspec.yml'
     - 'scripts/*'
   base-directory: backend
-
-cache:
-  paths:
-    - '/go/pkg/**/*'

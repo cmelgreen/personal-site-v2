@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.16.0
 
 RUN apt-get -y update && apt-get -y install libvips-dev \
     && rm -rf /var/lib/apt/lists/*
