@@ -9,7 +9,7 @@ phases:
     commands:
       - docker build -t server .
 
-  post-build:
+  post_build: 
     commands:
       - docker push 010629071893.dkr.ecr.us-east-1.amazonaws.com/test
 
