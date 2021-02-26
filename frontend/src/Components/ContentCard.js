@@ -17,7 +17,7 @@ export default function ContentCard(props) {
   const popOff = props.popOff ? props.popOff : 0;
   const [pop, setPop] = useState(popOff);
 
-  const apiRoot = "http://localhost:8080/api/img/"
+  const apiRoot = "https://cmelgreen/"
 
   const accentOn = "secondary";
   const accentOff = "textPrimary";
