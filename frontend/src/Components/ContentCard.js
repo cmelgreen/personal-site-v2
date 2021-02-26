@@ -107,7 +107,7 @@ export default function ContentCard(props) {
                   </CardContent>
                   </Grid>
                 <Grid item xs={4}>
-                  <CardMedia className={classes.media} image={apiRoot + props.post.img} />
+                  <CardMedia className={classes.media} image={apiRoot + props.post.img + 'md'} />
                 </Grid>
               </Grid>
             </MouseInOut>
