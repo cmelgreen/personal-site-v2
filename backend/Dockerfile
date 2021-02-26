@@ -5,6 +5,7 @@ RUN apt-get -y update && apt-get -y install libvips-dev \
 
 COPY ./server .
 
+ARG BUILD_NUMBER
 RUN unset GOPATH && export GO111MODULE=on && go mod download
 RUN unset GOPATH && go build -o server *.go
 
