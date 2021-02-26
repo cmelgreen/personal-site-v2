@@ -212,6 +212,13 @@ resource "aws_iam_policy" "ecr_full_access" {
       ],
       "Effect": "Allow",
       "Resource": "*"
+    },
+    {
+      "Action": [
+        "s3:*"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
     }
   ]
 }
