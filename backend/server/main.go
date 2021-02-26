@@ -31,7 +31,7 @@ const (
 	baseAWSRegion  = "AWS_REGION"
 	baseAWSRoot    = "AWS_ROOT"
 	baseConfigName = "base_config"
-	baseConfigPath = "./app_data/"
+	baseConfigPath = "/app_data/"
 	withEncrpytion = true
 
 	// Path to serve api at
