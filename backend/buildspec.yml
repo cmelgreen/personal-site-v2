@@ -13,9 +13,7 @@ phases:
   build:
     commands:
       - cd backend
-      - docker build --cache-from 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest \
-        --build-arg BUILD_NUMBER=$CODEBUILD_SOURCE_VERSION \
-        --tag 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest .
+      - docker build --cache-from 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest --build-arg BUILD_NUMBER=$CODEBUILD_SOURCE_VERSION --tag 010629071893.dkr.ecr.us-east-1.amazonaws.com/test:latest .
 
   post_build:
     commands:
