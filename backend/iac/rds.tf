@@ -51,7 +51,7 @@ resource "aws_ssm_parameter" "user" {
 resource "aws_ssm_parameter" "password" {
     name        = "/personal-site-db/password"
     type        = "SecureString"
-    value       = "postgres"
+    value       = "postgres-personal-site"
 }
 
 resource "aws_ssm_parameter" "port" {
