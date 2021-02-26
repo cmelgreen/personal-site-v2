@@ -150,10 +150,10 @@ resource "aws_codedeploy_deployment_group" "backend_deployment_group" {
       value = "personal-site-backend"
     }
 
-    auto_rollback_configuration {
-        enabled             = true
-        events              = ["DEPLOYMENT_FAILURE"]
-    }
+    # auto_rollback_configuration {
+    #     enabled             = true
+    #     events              = ["DEPLOYMENT_FAILURE"]
+    # }
 }
 
 resource "aws_iam_role" "codedeploy_iam_role" {
