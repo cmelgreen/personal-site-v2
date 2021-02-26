@@ -92,7 +92,7 @@ export default function Editor(props) {
       image
     )
 
-    axios.post('http://localhost:8080/api/img/', formData, {
+    axios.post('https://api.cmelgreen.com/api/img/', formData, {
       headers: { 'content-type': 'multipart/form-data' }
     })
     .then(resp => {
