@@ -62,7 +62,7 @@ func (s *Server) serveHTTPS(port string) {
 	cert := autocert.Manager{
 		Prompt: autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist("api.cmelgreen.com"),
-		Cache:  autocert.DirCache("/certs"),
+		Cache:  autocert.DirCache("/certs/"),
 	}
 
 	httpsMux := &http.Server{

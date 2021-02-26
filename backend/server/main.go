@@ -25,7 +25,7 @@ const (
 	portEnvVar  = "PERSONAL_SITE_PORT"
 	defaultPort = ":80"
 	frontendDir = "/frontend/static"
-	ssl 		= true
+	https		 = true
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
 	baseAWSRegion  = "AWS_REGION"
@@ -98,11 +98,12 @@ func main() {
 	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.mux.Get(apiRoot+"/status", status)
 	s.log.Println("Serving:")
+	s.log.Println("https: ", https)
 	s.printRoutes()
 
 	//createDummyPost(ctx, s)
 
-	if ssl {
+	if https {
 		s.serveHTTPS(port)
 	} else {
 		s.serve(port)
