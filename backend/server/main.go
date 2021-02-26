@@ -47,21 +47,21 @@ func main() {
 	s := newServer(ctx)
 
 	// Setup DB for API
-	// dbConfig := database.DBConfigFromAWS{
-	// 	BaseAWSRegion:  baseAWSRegion,
-	// 	BaseAWSRoot:    baseAWSRoot,
-	// 	BaseConfigName: baseConfigName,
-	// 	BaseConfigPath: baseConfigPath,
-	// 	WithEncrpytion: withEncrpytion,
-	// }
-
-	dbConfig := database.DBConfigFromValues{
-		Database: "postgres",
-		Host:     "personal-site-db.cjarn4dqfsir.us-east-1.rds.amazonaws.com",
-		Port:     "5432",
-		User:     "postgres",
-		Password: "postgres-personal-site",
+	dbConfig := database.DBConfigFromAWS{
+		BaseAWSRegion:  baseAWSRegion,
+		BaseAWSRoot:    baseAWSRoot,
+		BaseConfigName: baseConfigName,
+		BaseConfigPath: baseConfigPath,
+		WithEncrpytion: withEncrpytion,
 	}
+
+	// dbConfig := database.DBConfigFromValues{
+	// 	Database: "postgres",
+	// 	Host:     "personal-site-db.cjarn4dqfsir.us-east-1.rds.amazonaws.com",
+	// 	Port:     "5432",
+	// 	User:     "postgres",
+	// 	Password: "postgres-personal-site",
+	// }
 
 	s.newDBConnection(ctx, dbConfig)
 

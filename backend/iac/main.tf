@@ -194,6 +194,30 @@ resource "aws_iam_role_policy_attachment" "backend_iam_policy_attachments" {
     role                        = aws_iam_role.backend_iam_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "ecr_policy_attachment" {
+  policy_arn = aws_iam_policy.ecr_full_access.arn
+  role = aws_iam_role.backend_iam_role.name
+}
+
+resource "aws_iam_policy" "ecr_full_access" {
+  name        = "ecr_full_access"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ecr:*"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_vpc" "vpc" {
     cidr_block              = "10.0.0.0/16"
     enable_dns_support      = true
