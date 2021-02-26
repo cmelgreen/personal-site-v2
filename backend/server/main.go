@@ -55,6 +55,8 @@ func main() {
 		WithEncrpytion: withEncrpytion,
 	}
 
+	s.log.Println(dbConfig.ConfigString(ctx))
+
 	// dbConfig := database.DBConfigFromValues{
 	// 	Database: "postgres",
 	// 	Host:     "personal-site-db.cjarn4dqfsir.us-east-1.rds.amazonaws.com",
