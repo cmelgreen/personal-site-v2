@@ -73,8 +73,8 @@ func (s *Server) serveHTTPS(cache autocert.Cache) {
 		},
 	}
 
-	go http.ListenAndServe(":80", cert.HTTPHandler(nil))
-	httpsMux.ListenAndServeTLS("", "")
+	go s.log.Fatal(http.ListenAndServe(":80", cert.HTTPHandler(nil)))
+	s.log.Fatal(httpsMux.ListenAndServeTLS("", ""))
 
 }
 

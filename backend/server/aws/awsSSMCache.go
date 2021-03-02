@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"log"
 )
 
 // SSMCache uses aws paramater store to cache tls certs
@@ -23,15 +24,31 @@ func NewSSMCache(encrypted bool, root string) *SSMCache {
 func (s *SSMCache) Get(ctx context.Context, key string) ([]byte, error) {
 	param, err := s.GetParams(ctx, s.encrypted, s.root, []string{key})	
 
+	if err != nil {
+		log.Println(err)
+	}
+
 	return []byte(param[key]), err
 }
 
 // Put implements autocert Put method
 func (s *SSMCache) Put(ctx context.Context, key string, data []byte) error {
-	return s.PutParam(ctx, s.encrypted, s.root, key, string(data))
+	err := s.PutParam(ctx, s.encrypted, s.root, key, string(data))
+	
+	if err != nil {
+		log.Println(err)
+	}
+
+	return err
 }
 
 // Delete implements autocert Delete method
 func (s *SSMCache) Delete(ctx context.Context, key string) error {
-	return s.DeleteParam(ctx, s.root, key)
+	err := s.DeleteParam(ctx, s.root, key)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	return err
 }

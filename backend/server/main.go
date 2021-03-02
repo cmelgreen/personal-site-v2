@@ -101,7 +101,7 @@ func main() {
 	s.printRoutes()
 
 	if https {
-		cache := aws.NewSSMCache(true, "personal-site/certs")
+		cache := aws.NewSSMCache(true, "/personal-site/certs")
 		s.serveHTTPS(cache)
 	} else {
 		s.serve(port)
