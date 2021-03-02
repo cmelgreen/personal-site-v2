@@ -22,7 +22,10 @@ func NewSSMCache(encrypted bool, root string) *SSMCache {
 
 // Get implements autocert Get method
 func (s *SSMCache) Get(ctx context.Context, key string) ([]byte, error) {
-	param, err := s.GetParams(ctx, s.encrypted, s.root, []string{key})	
+	var paramToGet []string
+	paramToGet = append(paramToGet, key)
+
+	param, err := s.GetParams(ctx, s.encrypted, s.root, paramToGet)	
 
 	if err != nil {
 		log.Println(err)

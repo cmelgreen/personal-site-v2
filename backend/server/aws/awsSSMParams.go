@@ -63,13 +63,11 @@ func (svc *SSM) PutParam(ctx context.Context, encrypted bool, root, key, value s
 
 	name := root + key
 
-	input := &ssm.PutParameterInput{
+	_, err := svc.PutParameterWithContext(ctx, &ssm.PutParameterInput{
 		Type: &paramType,
 		Name: &name,
 		Value: &value,
-	}
-
-	_, err := svc.PutParameterWithContext(ctx, input)
+	})
 
 	return err
 }
