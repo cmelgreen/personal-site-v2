@@ -5,14 +5,14 @@ import (
 	"os"
 	"time"
 
-	"personal-site-v2/backend/server/postservice"
-	"personal-site-v2/backend/server/imageresizeservice"
+	"personal-site-v2/backend/server/aws"
 	"personal-site-v2/backend/server/database"
+	"personal-site-v2/backend/server/imageresizeservice"
+	"personal-site-v2/backend/server/postservice"
 
 	"github.com/go-chi/chi"
 	// "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
-
 )
 
 // PULL INTO YAML FILE
@@ -20,12 +20,11 @@ const (
 	// Default timeout length
 	timeout = 10
 
-
 	// Default environment variable for serving and default port
 	portEnvVar  = "PERSONAL_SITE_PORT"
 	defaultPort = ":80"
 	frontendDir = "/frontend/static"
-	https		 = true
+	https       = true
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
 	baseAWSRegion  = "AWS_REGION"
@@ -59,7 +58,7 @@ func main() {
 
 	// dbConfig := database.DBConfigFromValues{
 	// 	Database: "postgres",
-	// 	Host:     "personal-site-db.cjarn4dqfsir.us-east-1.rds.amazonaws.com",
+	// 	Host:  
 	// 	Port:     "5432",
 	// 	User:     "postgres",
 	// 	Password: "postgres-personal-site",
@@ -75,7 +74,7 @@ func main() {
 
 	s.mux.Use(cors.AllowAll().Handler)
 	//s.mux.Use(middleware.Compress(5))
-	
+
 	s.mux.Get(apiRoot+"/post/{slug}", postService.GetPostHTTP())
 	s.mux.Get(apiRoot+"/post-summaries", postService.GetPostSummariesHTTP())
 
@@ -101,12 +100,11 @@ func main() {
 	s.log.Println("https: ", https)
 	s.printRoutes()
 
-	//createDummyPost(ctx, s)
-
 	if https {
-		s.serveHTTPS(port)
+		cache := aws.NewSSMCache(true, "personal-site/certs")
+		s.serveHTTPS(cache)
 	} else {
 		s.serve(port)
 	}
-	
+
 }

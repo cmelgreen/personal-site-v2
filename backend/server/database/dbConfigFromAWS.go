@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"personal-site-v2/backend/server/aws"
+
 	"github.com/spf13/viper"
 )
 
@@ -34,7 +36,7 @@ func (dbConfig DBConfigFromAWS) ConfigString(ctx context.Context) (string, error
 	awsRegion := viper.GetString(dbConfig.BaseAWSRegion)
 	ssmRoot := viper.GetString(dbConfig.BaseAWSRoot)
 
-	svc := NewSSM(awsRegion)
+	svc := aws.NewSSM(awsRegion)
 
 	params, err := svc.GetParams(ctx, dbConfig.WithEncrpytion, ssmRoot, ssmParams)
 	if err != nil {
