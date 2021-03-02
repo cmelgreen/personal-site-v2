@@ -133,21 +133,25 @@ resource "aws_cloudfront_distribution" "site_distribution" {
     response_code         = 200
     response_page_path    = "/index.html"
   }
-
 }
 
 resource "aws_instance" "backend_ec2" {
     ami                         = "ami-0be2609ba883822ec"
-    instance_type               = "t2.nano"
+    instance_type               = "t2.small"
     associate_public_ip_address = true
     key_name                    = "zoff3"
+
+    root_block_device {
+          volume_size           = 30
+    }
+
 
     iam_instance_profile        = aws_iam_instance_profile.backend_iam_profile.name
     
     subnet_id                   = aws_subnet.public_subnet.id
     vpc_security_group_ids      = [aws_security_group.public_http_sg.id]
 
-    user_data                   = file("lc_user_data.sh")
+    user_data                   = file("user_data.sh")
 
     tags = {
       codedeploy = "personal-site-backend"

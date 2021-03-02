@@ -58,11 +58,11 @@ func (s *Server) serve(port string) {
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }
 
-func (s *Server) serveHTTPS(port string) {
+func (s *Server) serveHTTPS(cache autocert.Cache) {
 	cert := autocert.Manager{
 		Prompt: autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist("api.cmelgreen.com"),
-		Cache:  autocert.DirCache("/certs/"),
+		Cache:  cache,
 	}
 
 	httpsMux := &http.Server{

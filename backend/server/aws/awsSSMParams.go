@@ -1,4 +1,4 @@
-package database
+package aws
 
 import (
 	"context"
@@ -9,24 +9,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
-// AwsSSM extends AWS ssm.SSM
-type AwsSSM struct {
+// SSM extends AWS ssm.SSM
+type SSM struct {
 	*ssm.SSM
 }
 
 // NewSSM creates a new AWS connection returns a Simple Service Manager session
-func NewSSM(region string) *AwsSSM {
+func NewSSM(region string) *SSM {
 	sess := session.New()
 
-	return &AwsSSM{ssm.New(sess,
+	return &SSM{ssm.New(sess,
 		&aws.Config{
 			Region: aws.String(region),
 		})}
-
 }
 
 // GetParams returns map of key:value SSM Parameters as listed in paramsToGet along with any error fectching them
-func (svc *AwsSSM) GetParams(ctx context.Context, encrpyted bool, root string, paramsToGet []string) (map[string]string, error) {
+func (svc *SSM) GetParams(ctx context.Context, encrpyted bool, root string, paramsToGet []string) (map[string]string, error) {
 	params := make(map[string]string, len(paramsToGet))
 	var paramsToGetPaths []*string
 
@@ -51,4 +50,35 @@ func (svc *AwsSSM) GetParams(ctx context.Context, encrpyted bool, root string, p
 	}
 
 	return params, err
+}
+
+// PutParam creates a new paramater in the aws parameter store
+func (svc *SSM) PutParam(ctx context.Context, encrypted bool, root, key, value string) error {
+	var paramType string 
+	if encrypted {
+		paramType = ssm.ParameterTypeSecureString
+	} else {
+		paramType = ssm.ParameterTypeString
+	}
+
+	name := root + key
+
+	input := &ssm.PutParameterInput{
+		Type: &paramType,
+		Name: &name,
+		Value: &value,
+	}
+
+	_, err := svc.PutParameterWithContext(ctx, input)
+
+	return err
+}
+
+// DeleteParam removes a paramter from the paramter store
+func (svc *SSM) DeleteParam(ctx context.Context, root, key string) error {
+	name := root + key
+
+	_, err := svc.DeleteParameterWithContext(ctx, &ssm.DeleteParameterInput{Name: &name})
+
+	return err
 }
