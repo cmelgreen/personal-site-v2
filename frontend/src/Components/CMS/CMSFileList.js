@@ -22,10 +22,50 @@ export default function CMSFileList(props) {
       })
       .catch(() => setPosts([]))
   }, [props.render])
+
+  const uploadImage = (image) => {
+    const formData = new FormData()
+    const reader = new FileReader()
+    const url = reader.readAsDataURL(image)
+
+    setPreview(url)
+
+    formData.append(
+      "image",
+      image
+    )
+
+    axios.post('https://api.cmelgreen.com/api/img/static/', formData, {
+      headers: { 'content-type': 'multipart/form-data' }
+    })
+    .then(resp => {
+      console.log(resp)
+      setPost({...post, img: resp.data.path})
+    })
+    .catch(resp => console.log(resp))
+  }
   
 
   return (
     <List component="nav">
+        <ListItem xs={12} sm={12} lg={6} 
+          onClick={() => setSelected()}
+          button
+          component={
+            <Button variant="outlined" component="label">
+              <input
+                type="file"
+                onChange={e => uploadImage(e.target.files[0])}
+                hidden
+              />
+            </Button>
+          }
+          to={"/cms/"}>
+          <ListItemText 
+            primary="Upload Static File"
+            primaryTypographyProps={{variant: 'h4'}}
+          />
+        </ListItem>
         <ListItem xs={12} sm={12} lg={6} 
           onClick={() => setSelected()}
           button

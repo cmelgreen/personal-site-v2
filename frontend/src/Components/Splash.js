@@ -19,7 +19,7 @@ export const Splash = forwardRef((props, ref) => {
     <Card elevation={0}>
       <CardMedia ref={ref}>
         <Box className={classes.mediaWrapper} >
-          <DynamicPicture className={classes.media} src="http://localhost:8080/api/img/big-pic.jpg" />
+          <DynamicPicture className={classes.media} src="https://cmelgreen.com/static/media/big-pic-xl.jpg" />
         </Box>
         <Grid container direction="column" className={classes.center}>
           <Box className={classes.centerVertical}>
