@@ -48,7 +48,7 @@ func (s *Server) printRoutes() {
 		s.log.Printf("%s %s \n", method, route)
 		return nil
 	}
-	
+
 	if err := chi.Walk(s.mux, walkFunc); err != nil {
 		s.log.Printf("Logging err: %s\n", err.Error())
 	}
@@ -58,13 +58,11 @@ func (s *Server) serve(port string) {
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }
 
-
-
 func (s *Server) serveHTTPS(cache autocert.Cache) {
 	cert := autocert.Manager{
-		Prompt: autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist("api.cmelgreen.com"),
-		Cache:  cache,
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist("api.cmelgreen.com", "54.237.230.211"),
+		Cache:      cache,
 	}
 
 	getCert := func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
