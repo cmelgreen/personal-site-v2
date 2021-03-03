@@ -72,6 +72,8 @@ func (s *Server) serveHTTPS(cache autocert.Cache) {
 
 		if err != nil {
 			s.log.Println("Error getting certificate: ", err)
+		} else {
+			s.log.Println("No error getting certificate")
 		}
 
 		return certificate, err
@@ -85,8 +87,8 @@ func (s *Server) serveHTTPS(cache autocert.Cache) {
 		},
 	}
 
-	go s.log.Fatal(http.ListenAndServe(":80", cert.HTTPHandler(nil)))
-	s.log.Fatal(httpsMux.ListenAndServeTLS("", ""))
+	go http.ListenAndServe(":80", cert.HTTPHandler(nil))
+	httpsMux.ListenAndServeTLS("", "")
 
 }
 
