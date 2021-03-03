@@ -53,7 +53,8 @@ func newImageResizeService(breakpoints breakpointMap, namespace string, writer f
 	}
 }
 
-// CreateImageHTTP saves an image
+
+// CreateImageHTTP saves an image at a unique address
 func CreateImageHTTP(rootDir, namespace string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		file, _, err := r.FormFile("image")
@@ -68,7 +69,51 @@ func CreateImageHTTP(rootDir, namespace string) http.HandlerFunc {
 		//writer := writer{}
 		ir := newImageResizeService(defaultBreakpoints, namespace, s)
 
-		path, err := ir.saveImageAllSizes(file, rootDir)
+		path, err := ir.saveImageAllSizesUUID(file, rootDir)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = s.getUploadErr()
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		fmt.Println("No errors uploading to ", path)
+
+		jsonResp := struct {
+			Path string `json:"path"`
+		}{
+			Path: path,
+		}
+
+		fmt.Println(jsonResp)
+
+		//w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(jsonResp)
+	}
+}
+
+// CreateStaticImageHTTP saves an image at the given name
+func CreateStaticImageHTTP(rootDir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		file, fileHeader, err := r.FormFile("image")
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		s := newS3FileUploader("cm-personal-site-v2-bucket", len(defaultBreakpoints))
+		//writer := writer{}
+		ir := newImageResizeService(defaultBreakpoints, "", s)
+
+		path, err := ir.saveImageAllSizesStatic(file, fileHeader.Filename)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -119,40 +164,66 @@ func (ir *imageResizeService) uuidPath(r io.Reader, rootDir string) string {
 	return filepath.Join(rootDir, uid)
 }
 
-func (ir *imageResizeService) saveImageAllSizes(image io.Reader, rootDir string) (string, error) {
-	var pipeBuf bytes.Buffer
-	uuidReader := io.TeeReader(image, &pipeBuf)
+func (ir *imageResizeService) saveImageAllSizesStatic(image io.Reader, path string) (string, error) {
+	var imgBuf bytes.Buffer
+	imgBuf.ReadFrom(image)
+
+	return ir.saveImageAllSizes(imgBuf, path)
+}
+
+func (ir *imageResizeService) saveImageAllSizesUUID(image io.Reader, rootDir string) (string, error) {
+	var imgBuf bytes.Buffer
+	uuidReader := io.TeeReader(image, &imgBuf)
 
 	path := ir.uuidPath(uuidReader, rootDir)
 
-	readers, writers := createPipesForBreakpoints(ir.breakpoints)
-	done := make(chan error)
+	return ir.saveImageAllSizes(imgBuf, path)
+}
 
+func (ir *imageResizeService) saveImageAllSizes(imgBuf bytes.Buffer, path string) (string, error) {
+	readers, writers := createPipesForBreakpoints(ir.breakpoints)
+	saveSuccess := make(chan error)
+
+	ir.resizeAndSaveAll(readers, path, saveSuccess)
+	go ir.copyWritersToReaders(writers, imgBuf)
+
+	err := ir.blockUntilAllSizesSaved(saveSuccess)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+// saveAllSizes launches separate go routines to resize and save all sizes at once
+func (ir *imageResizeService) resizeAndSaveAll(readers map[string]*io.PipeReader, path string, done chan error) {
 	for size, bkpt := range ir.breakpoints {
 		go func(size string, bkpt breakpoint) {
 			done <- ir.saveImageAtSize(readers[size], path, size, bkpt)
 		}(size, bkpt)
 	}
+}
 
-	go func() {
-		for size := range ir.breakpoints {
-			defer writers[size].Close()
-		}
+func (ir *imageResizeService) copyWritersToReaders(writers map[string]*io.PipeWriter, imgBuf bytes.Buffer) {
+	for size := range ir.breakpoints {
+		defer writers[size].Close()
+	}
 
-		writerSlice := getPipeWriterMapAsWriterSlice(writers)
-		mw := io.MultiWriter(writerSlice...)
+	writerSlice := getPipeWriterMapAsWriterSlice(writers)
+	mw := io.MultiWriter(writerSlice...)
 
-		io.Copy(mw, &pipeBuf)
-	}()
+	io.Copy(mw, &imgBuf)
+}
 
+func (ir *imageResizeService) blockUntilAllSizesSaved(done chan error) error {
 	for range ir.breakpoints {
 		err := <-done
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 
-	return path, nil
+	return nil
 }
 
 func createPipesForBreakpoints(b breakpointMap) (map[string]*io.PipeReader, map[string]*io.PipeWriter) {
@@ -176,8 +247,8 @@ func getPipeWriterMapAsWriterSlice(writers map[string]*io.PipeWriter) []io.Write
 	return writerSlice
 }
 
-func (ir *imageResizeService) saveImageAtSize(image io.Reader, rootDir, sizeSuffix string, b breakpoint) error {
-	path := filepath.Join(rootDir, sizeSuffix)
+func (ir *imageResizeService) saveImageAtSize(image io.Reader, path, size string, b breakpoint) error {
+	path = path + "-" + size
 
 	image = resizeImage(image, b)
 
