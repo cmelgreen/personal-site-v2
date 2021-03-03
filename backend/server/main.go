@@ -25,7 +25,7 @@ const (
 	portEnvVar  = "PERSONAL_SITE_PORT"
 	defaultPort = ":80"
 	frontendDir = "/frontend/static"
-	https       = false
+	https       = true
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
 	baseAWSRegion  = "AWS_REGION"
@@ -104,7 +104,7 @@ func main() {
 	if https {
 		//cache := aws.NewSSMCache(true, "/personal-site/certs/", "us-east-1")
 		//cache.Put(ctx, "test", []byte("test-vaue"))
-		cache := autocert.DirCache("/certs/")
+		cache := autocert.DirCache("/go/certs/")
 		s.serveHTTPS(cache)
 	} else {
 		s.serve(port)
