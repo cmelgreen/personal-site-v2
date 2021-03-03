@@ -164,13 +164,6 @@ func (ir *imageResizeService) uuidPath(r io.Reader, rootDir string) string {
 	return filepath.Join(rootDir, uid)
 }
 
-func (ir *imageResizeService) saveImageAllSizesStatic(image io.Reader, path string) (string, error) {
-	var imgBuf bytes.Buffer
-	imgBuf.ReadFrom(image)
-
-	return ir.saveImageAllSizes(imgBuf, path)
-}
-
 func (ir *imageResizeService) saveImageAllSizesUUID(image io.Reader, rootDir string) (string, error) {
 	var imgBuf bytes.Buffer
 	uuidReader := io.TeeReader(image, &imgBuf)
@@ -180,11 +173,18 @@ func (ir *imageResizeService) saveImageAllSizesUUID(image io.Reader, rootDir str
 	return ir.saveImageAllSizes(imgBuf, path)
 }
 
+func (ir *imageResizeService) saveImageAllSizesStatic(image io.Reader, path string) (string, error) {
+	var imgBuf bytes.Buffer
+	imgBuf.ReadFrom(image)
+
+	return ir.saveImageAllSizes(imgBuf, path)
+}
+
 func (ir *imageResizeService) saveImageAllSizes(imgBuf bytes.Buffer, path string) (string, error) {
 	readers, writers := createPipesForBreakpoints(ir.breakpoints)
 	saveSuccess := make(chan error)
 
-	ir.resizeAndSaveAll(readers, path, saveSuccess)
+	ir.resizeAndSaveFromReaders(readers, path, saveSuccess)
 	go ir.copyWritersToReaders(writers, imgBuf)
 
 	err := ir.blockUntilAllSizesSaved(saveSuccess)
@@ -196,7 +196,7 @@ func (ir *imageResizeService) saveImageAllSizes(imgBuf bytes.Buffer, path string
 }
 
 // saveAllSizes launches separate go routines to resize and save all sizes at once
-func (ir *imageResizeService) resizeAndSaveAll(readers map[string]*io.PipeReader, path string, done chan error) {
+func (ir *imageResizeService) resizeAndSaveFromReaders(readers map[string]*io.PipeReader, path string, done chan error) {
 	for size, bkpt := range ir.breakpoints {
 		go func(size string, bkpt breakpoint) {
 			done <- ir.saveImageAtSize(readers[size], path, size, bkpt)
@@ -272,14 +272,9 @@ func resizeImage(image io.Reader, b breakpoint) io.Reader {
 	return bytes.NewReader(outBuf)
 }
 
-type writer struct{}
+type dirWriter struct{}
 
-func (w writer) writeFile(path string, r io.Reader) error {
-	// bytes, err := ioutil.ReadAll(r)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
+func (w dirWriter) writeFile(path string, r io.Reader) error {
 	err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 	if err != nil {
 		fmt.Println(err)
