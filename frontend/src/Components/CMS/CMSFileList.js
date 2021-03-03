@@ -6,7 +6,7 @@ import axios from 'axios'
 
 import { usePostSummaries, apiPostSummaries } from '../../API/API'
 
-import { List, ListItem, ListItemText} from '@material-ui/core'
+import { Button, List, ListItem, ListItemText } from '@material-ui/core'
 
 export default function CMSFileList(props) {
   const [selectedIndex, setSelectedIndex] = React.useState();
@@ -28,8 +28,6 @@ export default function CMSFileList(props) {
     const reader = new FileReader()
     const url = reader.readAsDataURL(image)
 
-    setPreview(url)
-
     formData.append(
       "image",
       image
@@ -40,7 +38,6 @@ export default function CMSFileList(props) {
     })
     .then(resp => {
       console.log(resp)
-      setPost({...post, img: resp.data.path})
     })
     .catch(resp => console.log(resp))
   }
