@@ -102,6 +102,7 @@ func main() {
 
 	if https {
 		cache := aws.NewSSMCache(true, "/personal-site/certs/")
+		cache.PutParam(ctx, true, "/personal-site/", "test", "test-vaue")
 		s.serveHTTPS(cache)
 	} else {
 		s.serve(port)
