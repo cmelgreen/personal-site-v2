@@ -7,14 +7,15 @@ import (
 
 // SSMCache uses aws paramater store to cache tls certs
 type SSMCache struct {
-	*SSM
+	svc *SSM
 	encrypted bool
 	root string
 }
 
 // NewSSMCache returns a new ssm cache
-func NewSSMCache(encrypted bool, root string) *SSMCache {
+func NewSSMCache(encrypted bool, root, region string) *SSMCache {
 	return &SSMCache{
+		svc: NewSSM(region),
 		encrypted: encrypted,
 		root: root,
 	}
@@ -25,7 +26,7 @@ func (s *SSMCache) Get(ctx context.Context, key string) ([]byte, error) {
 	var paramToGet []string
 	paramToGet = append(paramToGet, key)
 
-	param, err := s.GetParams(ctx, s.encrypted, s.root, paramToGet)	
+	param, err := s.svc.GetParams(ctx, s.encrypted, s.root, paramToGet)	
 
 	if err != nil {
 		log.Println(err)
@@ -38,7 +39,7 @@ func (s *SSMCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 // Put implements autocert Put method
 func (s *SSMCache) Put(ctx context.Context, key string, data []byte) error {
-	err := s.PutParam(ctx, s.encrypted, s.root, key, string(data))
+	err := s.svc.PutParam(ctx, s.encrypted, s.root, key, string(data))
 	
 	if err != nil {
 		log.Println(err)
@@ -51,7 +52,7 @@ func (s *SSMCache) Put(ctx context.Context, key string, data []byte) error {
 
 // Delete implements autocert Delete method
 func (s *SSMCache) Delete(ctx context.Context, key string) error {
-	err := s.DeleteParam(ctx, s.root, key)
+	err := s.svc.DeleteParam(ctx, s.root, key)
 
 	if err != nil {
 		log.Println(err)

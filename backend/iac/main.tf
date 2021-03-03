@@ -190,7 +190,7 @@ resource "aws_iam_instance_profile" "backend_iam_profile" {
 resource "aws_iam_role_policy_attachment" "backend_iam_policy_attachments" {
     for_each  = toset([
       "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy",
-      "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess",
+      "arn:aws:iam::aws:policy/AmazonSSMFullAccess",
       "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
     ])
 
