@@ -29,6 +29,8 @@ func (s *SSMCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 	if err != nil {
 		log.Println(err)
+	} else {
+		log.Println("No error fetching: ", key, ": ", param[key])
 	}
 
 	return []byte(param[key]), err
@@ -40,6 +42,8 @@ func (s *SSMCache) Put(ctx context.Context, key string, data []byte) error {
 	
 	if err != nil {
 		log.Println(err)
+	}else {
+		log.Println("No error putting: ", key, ": ", string(data))
 	}
 
 	return err
@@ -51,6 +55,8 @@ func (s *SSMCache) Delete(ctx context.Context, key string) error {
 
 	if err != nil {
 		log.Println(err)
+	}else {
+		log.Println("No error deleting: ", key)
 	}
 
 	return err
