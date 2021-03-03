@@ -5,11 +5,11 @@ import (
 	"os"
 	"time"
 
-	//"personal-site-v2/backend/server/aws"
+	"personal-site-v2/backend/server/aws"
 	"personal-site-v2/backend/server/database"
 	"personal-site-v2/backend/server/imageresizeservice"
 	"personal-site-v2/backend/server/postservice"
-	"golang.org/x/crypto/acme/autocert"
+	//"golang.org/x/crypto/acme/autocert"
 
 	"github.com/go-chi/chi"
 	// "github.com/go-chi/chi/middleware"
@@ -102,9 +102,9 @@ func main() {
 	s.printRoutes()
 
 	if https {
-		//cache := aws.NewSSMCache(true, "/personal-site/certs/", "us-east-1")
+		cache := aws.NewSSMCache(true, "/personal-site/certs/", "us-east-1")
 		//cache.Put(ctx, "test", []byte("test-vaue"))
-		cache := autocert.DirCache("/go/certs/")
+		//cache := autocert.DirCache("/go/certs/")
 		s.serveHTTPS(cache)
 	} else {
 		s.serve(port)
