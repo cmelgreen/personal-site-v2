@@ -58,6 +58,8 @@ func (s *Server) serve(port string) {
 	s.log.Fatal(http.ListenAndServe(port, s.mux))
 }
 
+
+
 func (s *Server) serveHTTPS(cache autocert.Cache) {
 	cert := autocert.Manager{
 		Prompt: autocert.AcceptTOS,
@@ -65,11 +67,21 @@ func (s *Server) serveHTTPS(cache autocert.Cache) {
 		Cache:  cache,
 	}
 
+	getCert := func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+		certificate, err := cert.GetCertificate(hello)
+
+		if err != nil {
+			s.log.Println("Error getting certificate: ", err)
+		}
+
+		return certificate, err
+	}
+
 	httpsMux := &http.Server{
 		Addr:    ":443",
 		Handler: s.mux,
 		TLSConfig: &tls.Config{
-			GetCertificate: cert.GetCertificate,
+			GetCertificate: getCert,
 		},
 	}
 
