@@ -25,7 +25,7 @@ const (
 	portEnvVar  = "PERSONAL_SITE_PORT"
 	defaultPort = ":80"
 	frontendDir = "/frontend/static"
-	https       = true
+	https       = false
 
 	// Environment vars/files to check for AWS CLI & SSM configuration
 	baseAWSRegion  = "AWS_REGION"
