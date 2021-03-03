@@ -94,7 +94,7 @@ func main() {
 		port = defaultPort
 	}
 
-	s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("/", "test"))
+	s.mux.Post(apiRoot+"/img/", imageresizeservice.CreateImageHTTP("/static/media", "test"))
 	s.mux.Get(apiRoot+"/img/{img}", serveDynamicImage())
 	s.mux.Get(apiRoot+"/status", status)
 	s.log.Println("Serving:")
