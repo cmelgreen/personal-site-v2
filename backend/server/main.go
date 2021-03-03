@@ -71,7 +71,7 @@ func main() {
 	richTextParser := &DraftJS{}
 
 	postService := postservice.NewPostService(s.db, richTextParser)
-	authApp := newFirebaseAuth("../credentials/firebase.json")
+	authApp := newFirebaseAuth("/certs/firebase.json")
 
 	s.mux.Use(cors.AllowAll().Handler)
 	//s.mux.Use(middleware.Compress(5))
