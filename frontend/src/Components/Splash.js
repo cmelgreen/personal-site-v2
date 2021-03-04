@@ -12,7 +12,7 @@ import Typography from "@material-ui/core/Typography";
 
 import DynamicPicture from './DynamicPicture'
 
-export const Splash = forwardRef((props, ref) => {
+const Splash = forwardRef((props, ref) => {
   const classes = useStyles()
 
   return (
@@ -79,3 +79,5 @@ const useStyles = makeStyles((theme) => ({
     height: 'inheret'
   }
 }))
+
+export default Splash
