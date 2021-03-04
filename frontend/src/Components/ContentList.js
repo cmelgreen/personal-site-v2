@@ -40,9 +40,9 @@ const ContentList = forwardRef((props, ref) => {
       <Typography ref={ref} variant='h4' align='center'>{props.category}</Typography>
       <Grid container spacing={2} alignItems='center'>
         {filteredPosts.map((post, i) => 
-        <Grid item xs={12} sm={12} md={6} lg={6} >
-          <ContentCard key={i} post={post}/>
-        </Grid>
+          <Grid item xs={12} sm={12} md={6} lg={6} >
+            <ContentCard key={i} post={post}/>
+          </Grid>
         )}
       </Grid>
     </Grid>

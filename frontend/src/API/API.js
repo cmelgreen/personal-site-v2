@@ -53,7 +53,7 @@ export const usePostBySlug = (slug, raw=false) => {
     }
   }, [slug])
 
-  return [post, setPost]
+  return post
 }
 
 export const deletePost = (post, idToken) => {

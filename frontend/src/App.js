@@ -11,6 +11,7 @@ import "./styles.css";
 //content
 const CMSWithLogin = lazy(() => import('./Components/CMSWithLogin'))
 const MainPage = lazy(() => import('./Components/MainPage'))
+const Post = lazy(() => import('./Components/Post'))
 
 const theme = createMuiTheme({
   palette: {
@@ -52,12 +53,9 @@ export default function App() {
         <ThemeProvider theme={theme}>
           <Suspense fallback={Loading}>
             <Router>
-              <Route path={'/cms/:slug?'}>
-                <CMSWithLogin config={config}/>
-              </Route>
-              <Route path="/" exact={true}>
-                <MainPage />
-              </Route>
+              <Route path="/" exact component={MainPage} />
+              <Route path='/post/:slug' component={Post} />
+              <Route path='/cms/:slug?' render={() => <CMSWithLogin config={config}/>}/>
             </Router>
           </Suspense>
         </ThemeProvider>
@@ -66,7 +64,7 @@ export default function App() {
   );
 }
 
-const Loading = () => (<div>Loading...</div>)
+const Loading = () => (<div/>)
 
 
 
