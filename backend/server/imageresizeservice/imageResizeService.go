@@ -113,7 +113,7 @@ func CreateStaticImageHTTP(rootDir string) http.HandlerFunc {
 		//writer := writer{}
 		ir := newImageResizeService(defaultBreakpoints, "", s)
 
-		path, err := ir.saveImageAllSizesStatic(file, fileHeader.Filename)
+		path, err := ir.saveImageAllSizesStatic(file, rootDir + fileHeader.Filename)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
