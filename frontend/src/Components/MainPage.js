@@ -24,7 +24,7 @@ export default function MainPage(props) {
     return (
         <>
             <Header className="top-bar" onClick={onClick} primary={inView} />
-            <Splash ref={inViewRef} />
+            <Splash ref={inViewRef} timeout={4000}/>
             <HeaderPadding height={64} ref={scrollRef} /> 
             <ContentList category={category} />
         </>

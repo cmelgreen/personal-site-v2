@@ -11,6 +11,8 @@ import CardHeader from "@material-ui/core/CardHeader";
 import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import { Link } from 'react-router-dom'
+
 
 export default function ContentCard(props) {
   const popOn = props.popOn ? props.popOn : 5;
@@ -76,6 +78,7 @@ export default function ContentCard(props) {
     <>
       <Card className={classes.card} elevation={pop}>
         <MouseInOut function={setPop} in={popOn} out={popOff}>
+          <Link to={'post/' + props.post.slug} style={{ textDecoration: 'none' }}>
           <CardActionArea
             classes={{
               root: classes.actionArea,
@@ -84,7 +87,7 @@ export default function ContentCard(props) {
           >
             <MouseInOut function={setTitleColor} in={accentOn} out={accentOff}>
               <Grid container spacing={0} alignItems='center' >
-                <Grid item xs={8} >
+                <Grid item xs={8}>
                   <CardHeader
                     className={classes.header}
                     title={props.post.title}
@@ -94,27 +97,25 @@ export default function ContentCard(props) {
                     subheader={props.post.category}
                     subheaderTypographyProps={{
                       color: titleColor,
-                      //variant: 'h6'
                     }}
-                    onClick={props.handleClick}
                   />
                   <CardContent className={classes.content}>
-  
                     <Typography color="textSecondary">
                       {props.post.summary}
                     </Typography>
-
                   </CardContent>
                   </Grid>
                 <Grid item xs={4}>
                   <CardMedia className={classes.media} image={apiRoot + props.post.img + '-xs'} />
                 </Grid>
               </Grid>
+              
             </MouseInOut>
           </CardActionArea>
           <CardActions className={classes.actions}>
             <Tags tags={props.post.tags} />
           </CardActions>
+          </Link>
         </MouseInOut>
       </Card>
     </>
