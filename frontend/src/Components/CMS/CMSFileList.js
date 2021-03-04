@@ -46,18 +46,10 @@ export default function CMSFileList(props) {
   return (
     <List component="nav">
         <ListItem xs={12} sm={12} lg={6} 
-          onClick={() => setSelected()}
           button
-          component={
-            <Button variant="outlined" component="label">
-              <input
-                type="file"
-                onChange={e => uploadImage(e.target.files[0])}
-                hidden
-              />
-            </Button>
-          }
-          to={"/cms/"}>
+          component="label"
+        >
+            <input type="file" onChange={e => uploadImage(e.target.files[0])} hidden></input>
           <ListItemText 
             primary="Upload Static File"
             primaryTypographyProps={{variant: 'h4'}}

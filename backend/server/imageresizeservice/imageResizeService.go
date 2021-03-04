@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"path/filepath"
-
+	"strings"
 	"io"
 	"io/ioutil"
 
@@ -248,11 +248,19 @@ func getPipeWriterMapAsWriterSlice(writers map[string]*io.PipeWriter) []io.Write
 }
 
 func (ir *imageResizeService) saveImageAtSize(image io.Reader, path, size string, b breakpoint) error {
-	path = path + "-" + size
+	suffix := "-" + size
+	path = insertSuffixBeforeExt(path, suffix)
 
 	image = resizeImage(image, b)
 
 	return ir.writer.writeFile(path, image)
+}
+
+func insertSuffixBeforeExt(file, suffix string) string {
+	ext := filepath.Ext(file)
+	file = strings.TrimSuffix(file, ext)
+
+	return file + suffix + ext
 }
 
 func resizeImage(image io.Reader, b breakpoint) io.Reader {

@@ -1,8 +1,10 @@
 import React from 'react'
 
 export default function DynamicPicture(props) {
-    const imgSrc = props.src.split('.')
-    const resize = size => `${imgSrc[0]}-${size}.${imgSrc[1]}`
+    const imgSrc = props.src
+    const imgExt = imgSrc.split('.').pop()
+  
+    const resize = size => `${imgSrc}-${size}.${imgExt}`
 
     console.log(resize('xs'))
   
