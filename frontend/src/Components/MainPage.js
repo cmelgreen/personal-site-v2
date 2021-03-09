@@ -5,10 +5,10 @@ import { useInView } from "react-hook-inview";
 
 import Box from '@material-ui/core/Box'
 
-
 import Header from './Header'
 import Splash from './Splash'
 import ContentList from './ContentList'
+import AboutMe from './AboutMe'
 
 export default function MainPage(props) {
     const scrollRef = useRef("scrollRef");
@@ -25,6 +25,7 @@ export default function MainPage(props) {
         <>
             <Header className="top-bar" onClick={onClick} primary={inView} />
             <Splash ref={inViewRef} timeout={4000}/>
+            <AboutMe />
             <HeaderPadding height={64} ref={scrollRef} /> 
             <ContentList category={category} />
         </>

@@ -30,15 +30,8 @@ const theme = createMuiTheme({
     }
   },
   typography: {
-    //fontFamily: 'Karla',
-    //fontFamily: 'Vollkorn',
-    //fontFamily: 'Lora',
     fontFamily: 'Frank Ruhl Libre',
     fontSmoothing: 'antialiased',
-    // button: {
-    //   fontWeight: 600,
-    //   color: 'secondary',
-    // },
   },
 });
 
@@ -48,23 +41,20 @@ const config = require('./firebase/firebase.json')
 export default function App() {
   // Use react transitions
   return (
-    <div className="App">
-      <CssBaseline>
-        <ThemeProvider theme={theme}>
-          <Suspense fallback={Loading}>
-            <Router>
-              <Route path="/" exact component={MainPage} />
-              <Route path='/post/:slug' component={Post} />
-              <Route path='/cms/:slug?' render={() => <CMSWithLogin config={config}/>}/>
-            </Router>
-          </Suspense>
-        </ThemeProvider>
-      </CssBaseline>
-    </div>
+    <CssBaseline>
+      <ThemeProvider theme={theme}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Router>
+            <Route path="/" exact component={MainPage} />
+            <Route path='/post/:slug' component={Post} />
+            <Route path='/cms/:slug?' render={() => <CMSWithLogin config={config}/>}/>
+          </Router>
+        </Suspense>
+      </ThemeProvider>
+    </CssBaseline>
   );
 }
 
-const Loading = () => (<div/>)
 
 
 

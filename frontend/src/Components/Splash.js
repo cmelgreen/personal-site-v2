@@ -16,14 +16,14 @@ const Splash = forwardRef((props, ref) => {
   const classes = useStyles()
 
   return (
-    <Card elevation={0}>
-      <CardMedia ref={ref}>
+    <Card elevation={0} square>
+      <CardMedia ref={ref} >
         <Box className={classes.mediaWrapper} >
           <DynamicPicture className={classes.media} src="https://cmelgreen.com/static/media/big-pic.jpg" />
         </Box>
         <Grid container direction="column" className={classes.center}>
           <Box className={classes.centerVertical}>
-            <Typography className={classes.text} color='primary' align='left' variant="h1">
+            <Typography className={classes.title} color='primary' align='left' variant="h1">
               Full Stack.
               <Fade in={true} timeout={props.timeout}>
                 <Box>
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
     height: '57vw',
     width: '100vw'
   },
-  text: {
+  title: {
     [theme.breakpoints.down("xs")]: {fontSize: '50px'},
   }, 
   center: {

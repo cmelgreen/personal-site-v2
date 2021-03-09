@@ -14,8 +14,6 @@ import { AppBar, IconButton, Toolbar } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
 import { makeStyles } from "@material-ui/core/styles";
 
-import MenuIcon from "@material-ui/icons/Menu";
-
 export default function Header (props) {
     const trigger = useScrollTrigger({ threshold: 20 });
 
@@ -24,17 +22,19 @@ export default function Header (props) {
     const color = useToggleAfterInitialRender(props.primary, 'primary', 'textPrimary') 
     const bgColor = useToggleAfterInitialRender(props.primary, 'transparent', 'default')
 
-  
     const classes = makeStyles((theme) => ({
+      mainMenu: {
+          justifyContent: "center",
+      },
       name: {
         [theme.breakpoints.up("sm")]: { display: 'none'},
       }
-    }));
+    }))();
   
     return (
         <Slide appear={false} in={!trigger} timeout={400}>
           <AppBar color={bgColor} elevation={0}>
-            <Toolbar className="main-menu">
+            <Toolbar className={classes.mainMenu} >
               <IconButton edge="start" aria-label="menu">
               </IconButton>
               <Box display={{'xs': 'none', 'sm': 'block'}}>

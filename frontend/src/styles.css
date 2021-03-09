@@ -1,34 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre&display=swap');
 
-.App {
-  /* display: flex;
-  flex-wrap: wrap; */
-  /* position: relative; */
-
-  height: 200vh;
-
-  margin: 0;
-  padding: 0;
-  border: 0;
-
-  top: 0;
-  left: 0;
-}
-
-.top-bar {
-  background-color: rgba(0, 0, 0, 0);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.main-menu {
-  justify-content: center;
-}
-
-.splash{
-  align-content: center;
-}
 
 .big-picture {
   /* position: fixed; */

@@ -28,17 +28,17 @@ const api = axios.create({
   }
 });
 
-export const createPost = (post, idToken) => {
+export const createPost = (post, authToken) => {
   return api.post(apiPost, post, {
     headers: {
-      'Authorization': `Bearer ${idToken}` 
+      'Authorization': `Bearer ${authToken}` 
   }})
 }
 
-export const updatePost = (post, idToken) => {
+export const updatePost = (post, authToken) => {
   return api.put(apiPost, post, {
     headers: {
-      'Authorization': `Bearer ${idToken}` 
+      'Authorization': `Bearer ${authToken}` 
   }})
 }
 
