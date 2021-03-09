@@ -29,9 +29,10 @@ export default function ContentCard(props) {
     card: {
       display: "flex",
       alignItems: "flex-start",
-      //height: 230,
-      margin: 10,
-      border: 10,
+      height: 230,
+      width: '100%',
+      margin: 'auto',
+      border: 0,
       marginLeft: "auto",
       marginRight: "auto",
       textAlign: "left"
@@ -77,7 +78,7 @@ export default function ContentCard(props) {
   return (
     <>
       <Card className={classes.card} elevation={pop}>
-        <MouseInOut function={setPop} in={popOn} out={popOff}>
+        <MouseInOut className={classes.card} function={setPop} in={popOn} out={popOff}>
           <Link to={'post/' + props.post.slug} style={{ textDecoration: 'none' }}>
           <CardActionArea
             classes={{
