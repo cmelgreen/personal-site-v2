@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { forwardRef } from 'react';
+
+import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography';
 import ContentCard from './ContentCard.js'
 import Grid from '@material-ui/core/Grid'
 
 import { makeStyles } from "@material-ui/core/styles";
 
-  import { usePostSummaries } from '../API/API'
+import { usePostSummaries } from '../API/API'
 
 const ContentList = forwardRef((props, ref) => {
   const posts = usePostSummaries()
 
   const useStyles = makeStyles((theme) => ({
+    categoryTitle: {
+      margin: '5% auto 5% auto',
+    },
     contentGrid: {
       minHeight: '100vh',
       justifyContent: 'center',
@@ -31,24 +36,26 @@ const ContentList = forwardRef((props, ref) => {
     return post.category === props.category
   }
 
-  const filteredPosts = ( props.category === 'Content' || props.category === 'About Me') ?
+  const filteredPosts = ( props.category === 'Posts') ?
     posts :
     posts.filter(filterContent)
 
   return (
-    <Grid className={classes.contentGrid} alignContent='center'>
-      <Typography ref={ref} variant='h4' align='center'>{props.category}</Typography>
-      <Grid container spacing={2} alignItems='center'>
-        {filteredPosts.map((post, i) => 
-          <Grid item xs={12} sm={12} md={6} lg={6} >
-            <ContentCard key={i} post={post}/>
-          </Grid>
-        )}
+    <>
+      <Container className={classes.categoryTitle} padding={'10%'}>
+        <Typography ref={ref} variant='h1' align='center'>{props.category}</Typography>
+      </Container>      
+      <Grid className={classes.contentGrid} alignContent='center'>
+        <Grid container spacing={2} alignItems='center'>
+          {filteredPosts.map((post, i) => 
+            <Grid item xs={12} sm={12} md={6} lg={6} >
+              <ContentCard key={i} post={post}/>
+            </Grid>
+          )}
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   )
 })
-
-
 
 export default ContentList

@@ -15,7 +15,8 @@ import Slide from "@material-ui/core/Slide";
 import { makeStyles } from "@material-ui/core/styles";
 
 export default function Header (props) {
-    const trigger = useScrollTrigger({ threshold: 20 });
+    const trigger = useScrollTrigger();
+    //{ threshold: 0 }
 
     const buttons = ["DevOps", "Backend", "Frontend"];
   
@@ -38,7 +39,7 @@ export default function Header (props) {
               <IconButton edge="start" aria-label="menu">
               </IconButton>
               <Box display={{'xs': 'none', 'sm': 'block'}}>
-                <Button onClick={props.onClick("About Me")}>
+                <Button onClick={props.scrollToAbout()}>
                   <Typography style={{ textTransform: "none" }} color={color} variant="h5">
                     Cooper Melgreen
                   </Typography>
@@ -50,8 +51,8 @@ export default function Header (props) {
                 </Typography>
               </Box>
               {buttons.map((text, i) => (
-                <Button key={i} onClick={props.onClick(text)}>
-                  <Typography className="lower-case" style={{ marginRight: 10 }} color={color} variant="h5">
+                <Button key={i} onClick={props.scrollToPost(text)}>
+                  <Typography style={{ marginRight: 10, textTransform: 'none'}} color={color} variant="h5">
                     {text}
                   </Typography>
                 </Button>
